@@ -16,16 +16,21 @@
 </head>
 <body>
 
-  <!-- City lights canvas — anchored to the bottom -->
+  <!-- Sky canvas — stars & galaxy, sits behind everything -->
+  <canvas id="skyCanvas"></canvas>
+
+  <!-- City canvas — buildings & amber lights -->
   <canvas id="cityCanvas"></canvas>
 
   <!-- Moon glow — top right corner -->
   <div class="moon" aria-hidden="true"></div>
 
+  <!-- Pen nib — glowing tip that moves as the title is written -->
+  <div class="pen-nib" id="penNib" aria-hidden="true"></div>
+
   <!-- Animated title -->
   <div class="title-wrap" id="titleWrap">
     <h1 class="title" id="mainTitle"></h1>
-    <span class="cursor" id="typeCursor" aria-hidden="true">|</span>
   </div>
 
   <!-- Study button (not wired up yet) -->
