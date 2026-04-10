@@ -119,10 +119,8 @@ body {
   letter-spacing: 2px;
   line-height: 1.2;
   white-space: nowrap;
+  /* invisible — canvas draws the actual visible title */
   opacity: 0;
-
-  /* clip-path is driven by JS for the handwriting reveal */
-  clip-path: inset(0 100% 0 0);
 }
 
 /* ---- Language-specific font overrides ---- */
@@ -133,7 +131,6 @@ body {
   font-weight: 600;
   direction: rtl;
   unicode-bidi: isolate;
-  clip-path: inset(0 0 0 100%);
 }
 
 .title[lang="zh"],
