@@ -21,21 +21,34 @@ function drawSky() {
   const H = skyCanvas.height;
   skyCtx.clearRect(0, 0, W, H);
 
-  const glowPatches = [
-    { cx: W * 0.15, cy: H * 0.18, rx: W * 0.28, ry: H * 0.14, a: 0.07 },
-    { cx: W * 0.38, cy: H * 0.28, rx: W * 0.32, ry: H * 0.17, a: 0.09 },
-    { cx: W * 0.58, cy: H * 0.20, rx: W * 0.30, ry: H * 0.16, a: 0.08 },
-    { cx: W * 0.78, cy: H * 0.12, rx: W * 0.26, ry: H * 0.13, a: 0.06 },
+  // ── Galaxy nebula — multiple overlapping glow patches ──────
+  const nebulae = [
+    // Milky Way core: warm dusty golden-white spine
+    { cx: W*0.48, cy: H*0.18, rx: W*0.20, ry: H*0.09, r: 160, g: 140, b: 100, a: 0.14 },
+    // Broad purple galaxy arm — upper left
+    { cx: W*0.22, cy: H*0.14, rx: W*0.42, ry: H*0.22, r: 85,  g: 50,  b: 180, a: 0.11 },
+    // Deep blue nebula — center
+    { cx: W*0.40, cy: H*0.28, rx: W*0.36, ry: H*0.17, r: 30,  g: 60,  b: 190, a: 0.09 },
+    // Purple-pink arm — upper right
+    { cx: W*0.76, cy: H*0.11, rx: W*0.35, ry: H*0.20, r: 130, g: 55,  b: 190, a: 0.11 },
+    // Teal nebula hint — lower-left band
+    { cx: W*0.28, cy: H*0.35, rx: W*0.27, ry: H*0.14, r: 20,  g: 120, b: 160, a: 0.06 },
+    // Warm amber-orange — far right
+    { cx: W*0.90, cy: H*0.22, rx: W*0.22, ry: H*0.16, r: 185, g: 105, b: 55,  a: 0.07 },
+    // Wide diffuse ambient glow — whole upper sky
+    { cx: W*0.50, cy: H*0.08, rx: W*0.78, ry: H*0.26, r: 50,  g: 42,  b: 125, a: 0.08 },
+    // Secondary Milky Way core — slightly shifted for depth
+    { cx: W*0.57, cy: H*0.24, rx: W*0.16, ry: H*0.10, r: 175, g: 155, b: 120, a: 0.10 },
   ];
 
-  for (const p of glowPatches) {
+  for (const p of nebulae) {
     skyCtx.save();
     skyCtx.translate(p.cx, p.cy);
     skyCtx.scale(1, p.ry / p.rx);
     const grd = skyCtx.createRadialGradient(0, 0, 0, 0, 0, p.rx);
-    grd.addColorStop(0,   `rgba(95, 65, 155, ${p.a})`);
-    grd.addColorStop(0.5, `rgba(75, 50, 130, ${p.a * 0.55})`);
-    grd.addColorStop(1,   'transparent');
+    grd.addColorStop(0,    `rgba(${p.r},${p.g},${p.b},${p.a})`);
+    grd.addColorStop(0.45, `rgba(${p.r},${p.g},${p.b},${p.a * 0.42})`);
+    grd.addColorStop(1,    'transparent');
     skyCtx.beginPath();
     skyCtx.arc(0, 0, p.rx, 0, Math.PI * 2);
     skyCtx.fillStyle = grd;
@@ -43,60 +56,108 @@ function drawSky() {
     skyCtx.restore();
   }
 
-  const skyH = H * 0.72;
-  const starCount = Math.round((W * skyH) / 2800);
+  // ── Dense star field (~3x denser than before) ─────────────
+  const skyH     = H * 0.72;
+  const starCount = Math.round((W * skyH) / 900);
 
   for (let i = 0; i < starCount; i++) {
-    const x = Math.random() * W;
-    const y = Math.random() * skyH;
-    const bandInfluence = galaxyBandWeight(x, y, W, H);
-    if (Math.random() > 0.62 + bandInfluence * 0.38) continue;
+    const x  = Math.random() * W;
+    const y  = Math.random() * skyH;
+    const bw = galaxyBandWeight(x, y, W, H);
+
+    if (Math.random() > 0.52 + bw * 0.48) continue;
 
     const roll = Math.random();
-    const r = roll < 0.04 ? 1.4 + Math.random() * 0.8
-            : roll < 0.18 ? 0.8 + Math.random() * 0.5
-            :               0.3 + Math.random() * 0.4;
+    const r = roll < 0.015 ? 1.9 + Math.random() * 0.9
+            : roll < 0.10  ? 0.9 + Math.random() * 0.6
+            :                0.2 + Math.random() * 0.45;
 
-    const inBand = bandInfluence > 0.5;
+    const inBand = bw > 0.30;
     let hue, sat, lit, alpha;
-    if (inBand && Math.random() < 0.25) {
-      hue = 250 + Math.random() * 40; sat = 30 + Math.random() * 30;
-      lit = 70  + Math.random() * 20; alpha = 0.20 + Math.random() * 0.35;
+
+    if (inBand && Math.random() < 0.32) {
+      // Vivid colored stars in the galaxy band
+      const cr = Math.random();
+      if      (cr < 0.28) { hue = 248 + Math.random()*28; sat = 45+Math.random()*35; }
+      else if (cr < 0.52) { hue = 195 + Math.random()*32; sat = 35+Math.random()*30; }
+      else if (cr < 0.74) { hue = 38  + Math.random()*22; sat = 60+Math.random()*28; }
+      else                { hue = 10  + Math.random()*18; sat = 55+Math.random()*30; }
+      lit   = 68 + Math.random() * 24;
+      alpha = 0.28 + Math.random() * 0.52;
     } else {
-      hue = 200 + Math.random() * 45; sat = 10 + Math.random() * 35;
-      lit = 78  + Math.random() * 22; alpha = 0.18 + Math.random() * 0.60;
+      hue   = 195 + Math.random() * 55;
+      sat   = 4   + Math.random() * 32;
+      lit   = 78  + Math.random() * 22;
+      alpha = 0.14 + Math.random() * 0.75;
     }
+
     drawStar(skyCtx, x, y, r, hue, sat, lit, alpha);
   }
 
+  // ── Featured bright stars with diffraction spikes ─────────
   const featured = [
-    { x: W*0.08, y: H*0.06 }, { x: W*0.22, y: H*0.11 },
-    { x: W*0.47, y: H*0.04 }, { x: W*0.63, y: H*0.09 },
-    { x: W*0.82, y: H*0.15 }, { x: W*0.33, y: H*0.19 },
-    { x: W*0.91, y: H*0.07 }, { x: W*0.55, y: H*0.23 },
+    { x: W*0.08, y: H*0.06, r: 2.5, spike: true  },
+    { x: W*0.22, y: H*0.11, r: 2.1, spike: true  },
+    { x: W*0.47, y: H*0.04, r: 2.7, spike: true  },
+    { x: W*0.63, y: H*0.09, r: 2.0, spike: false },
+    { x: W*0.82, y: H*0.15, r: 2.3, spike: true  },
+    { x: W*0.33, y: H*0.19, r: 1.9, spike: false },
+    { x: W*0.91, y: H*0.07, r: 2.2, spike: true  },
+    { x: W*0.55, y: H*0.23, r: 1.8, spike: false },
+    { x: W*0.14, y: H*0.28, r: 2.0, spike: true  },
+    { x: W*0.70, y: H*0.26, r: 2.1, spike: true  },
+    { x: W*0.04, y: H*0.20, r: 1.7, spike: false },
+    { x: W*0.96, y: H*0.16, r: 1.8, spike: false },
   ];
+
   for (const s of featured) {
-    drawStar(skyCtx, s.x, s.y, 1.6 + Math.random() * 0.8, 215, 25, 95, 0.75);
+    drawStar(skyCtx, s.x, s.y, s.r, 215, 18, 97, 0.90);
+    if (s.spike) drawStarSpike(skyCtx, s.x, s.y, s.r);
   }
 }
 
 function galaxyBandWeight(x, y, W, H) {
-  const bandY = H * 0.08 + (x / W) * H * 0.25;
-  return Math.max(0, 1 - Math.abs(y - bandY) / (H * 0.18));
+  const bandY = H * 0.06 + (x / W) * H * 0.28;
+  return Math.max(0, 1 - Math.abs(y - bandY) / (H * 0.22));
 }
 
 function drawStar(ctx, x, y, r, hue, sat, lit, alpha) {
-  const color = `hsl(${hue}, ${sat}%, ${lit}%)`;
-  if (r > 1.0) {
-    const grd = ctx.createRadialGradient(x, y, 0, x, y, r * 4);
-    grd.addColorStop(0, `hsla(${hue}, ${sat}%, ${lit}%, ${alpha * 0.45})`);
+  if (r > 0.9) {
+    const grd = ctx.createRadialGradient(x, y, 0, x, y, r * 5);
+    grd.addColorStop(0, `hsla(${hue},${sat}%,${lit}%,${alpha * 0.50})`);
     grd.addColorStop(1, 'transparent');
-    ctx.beginPath(); ctx.arc(x, y, r * 4, 0, Math.PI * 2);
+    ctx.beginPath(); ctx.arc(x, y, r * 5, 0, Math.PI * 2);
     ctx.fillStyle = grd; ctx.fill();
   }
   ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
-  ctx.fillStyle = color; ctx.globalAlpha = alpha; ctx.fill();
+  ctx.fillStyle = `hsl(${hue},${sat}%,${lit}%)`;
+  ctx.globalAlpha = alpha; ctx.fill();
   ctx.globalAlpha = 1;
+}
+
+function drawStarSpike(ctx, x, y, r) {
+  ctx.save();
+  const len = r * 12;
+  for (let a = 0; a < 2; a++) {
+    const angle = a * Math.PI / 2;
+    const cos = Math.cos(angle), sin = Math.sin(angle);
+    const grad = ctx.createLinearGradient(
+      x - cos * len, y - sin * len,
+      x + cos * len, y + sin * len
+    );
+    grad.addColorStop(0,    'transparent');
+    grad.addColorStop(0.44, 'rgba(210, 228, 255, 0.22)');
+    grad.addColorStop(0.50, 'rgba(230, 242, 255, 0.55)');
+    grad.addColorStop(0.56, 'rgba(210, 228, 255, 0.22)');
+    grad.addColorStop(1,    'transparent');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 1.1;
+    ctx.beginPath();
+    ctx.moveTo(x - cos * len, y - sin * len);
+    ctx.lineTo(x + cos * len, y + sin * len);
+    ctx.stroke();
+  }
+  ctx.restore();
 }
 
 buildSky();
@@ -224,18 +285,14 @@ function drawBuilding(ctx, b) {
   const { x, y, w, h, style } = b;
   const [r, g, bl] = BODY_COLORS[style];
 
-  // Body
   ctx.fillStyle = `rgba(${r},${g},${bl},0.86)`;
   ctx.fillRect(x, y, w, h);
 
-  // Moonlit roofline edge
   ctx.fillStyle = 'rgba(100, 135, 190, 0.11)';
   ctx.fillRect(x, y, w, 1.5);
 
-  // Pre-generated windows
   for (const win of b.windows) {
     if (win.lit) {
-      // Soft glow halo
       const grd = ctx.createRadialGradient(
         win.x + win.w/2, win.y + win.h/2, 0,
         win.x + win.w/2, win.y + win.h/2, win.w * 2.2);
@@ -243,7 +300,6 @@ function drawBuilding(ctx, b) {
       grd.addColorStop(1, 'transparent');
       ctx.fillStyle = grd;
       ctx.fillRect(win.x - win.w, win.y - win.h, win.w * 3, win.h * 3);
-      // Bright pane
       ctx.fillStyle = `hsla(${win.hue},${win.sat}%,${win.lum}%,0.70)`;
       ctx.fillRect(win.x, win.y, win.w, win.h);
     } else {
@@ -252,7 +308,6 @@ function drawBuilding(ctx, b) {
     }
   }
 
-  // Rooftop
   drawRooftop(ctx, b.rooftop);
 }
 
@@ -267,12 +322,10 @@ function drawRooftop(ctx, rt) {
       ctx.moveTo(rt.cx, rt.y);
       ctx.lineTo(rt.cx, rt.y - rt.h);
       ctx.stroke();
-      // crossbar
       ctx.beginPath();
       ctx.moveTo(rt.cx - 5, rt.y - rt.h * 0.7);
       ctx.lineTo(rt.cx + 5, rt.y - rt.h * 0.7);
       ctx.stroke();
-      // red aviation blink stored as static dot
       ctx.fillStyle = 'rgba(255, 55, 55, 0.50)';
       ctx.beginPath();
       ctx.arc(rt.cx, rt.y - rt.h, 1.8, 0, Math.PI * 2);
@@ -296,7 +349,6 @@ function drawRooftop(ctx, rt) {
       ctx.fillStyle = 'rgba(12, 16, 36, 0.92)';
       ctx.fillRect(rt.bx + (rt.bw - s1w) / 2, rt.by - 14, s1w, 16);
       ctx.fillRect(rt.bx + (rt.bw - s2w) / 2, rt.by - 26, s2w, 14);
-      // spire
       ctx.fillStyle = 'rgba(65, 78, 115, 0.85)';
       ctx.beginPath();
       ctx.moveTo(rt.bx + rt.bw / 2, rt.by - 44);
@@ -309,7 +361,6 @@ function drawRooftop(ctx, rt) {
 
     case 'watertower': {
       const twx = rt.cx, twy = rt.y - 32;
-      // legs
       ctx.strokeStyle = 'rgba(40, 52, 85, 0.72)';
       ctx.lineWidth = 1.2;
       for (const dx of [-7, 0, 7]) {
@@ -318,7 +369,6 @@ function drawRooftop(ctx, rt) {
         ctx.lineTo(twx + dx * 1.6, rt.y);
         ctx.stroke();
       }
-      // tank
       ctx.fillStyle = 'rgba(16, 22, 46, 0.90)';
       ctx.beginPath();
       ctx.ellipse(twx, twy, 10, 5, 0, 0, Math.PI * 2);
@@ -344,7 +394,6 @@ function drawRooftop(ctx, rt) {
     case 'cornice': {
       ctx.fillStyle = 'rgba(17, 21, 44, 0.90)';
       ctx.fillRect(rt.bx - 3, rt.by - 7, rt.bw + 6, 9);
-      // small peaked ornament
       ctx.fillStyle = 'rgba(60, 72, 105, 0.80)';
       ctx.beginPath();
       ctx.moveTo(rt.cx, rt.by - 20);
@@ -363,17 +412,14 @@ function animateCity() {
   cityCtx.clearRect(0, 0, W, H);
   cityFrame++;
 
-  // Draw all buildings from pre-generated data
   for (const b of buildings) drawBuilding(cityCtx, b);
 
-  // Horizon glow — warm light pollution at the base
   const horizGrd = cityCtx.createLinearGradient(0, H * 0.68, 0, H);
   horizGrd.addColorStop(0, 'transparent');
   horizGrd.addColorStop(1, 'rgba(255, 125, 28, 0.07)');
   cityCtx.fillStyle = horizGrd;
   cityCtx.fillRect(0, H * 0.68, W, H * 0.32);
 
-  // Animated city lights
   for (const l of cityLights) {
     const tw    = Math.sin(cityFrame * l.speed * 60 + l.phase) * 0.11;
     const alpha = Math.max(0.06, Math.min(0.92, l.base + tw));
@@ -400,10 +446,10 @@ animateCity();
 
 
 // ============================================================
-//  TITLE — canvas handwriting animation
+//  TITLE — Calm Flowy Assembly Animation
+//  Letters drift gently down from above and settle into place.
 // ============================================================
 
-// Create a full-screen canvas for the title (dynamically, keeps HTML clean)
 const titleCanvas = document.createElement('canvas');
 titleCanvas.style.cssText =
   'position:fixed;top:0;left:0;width:100%;height:100%;z-index:12;pointer-events:none;';
@@ -418,7 +464,6 @@ resizeTitleCanvas();
 window.addEventListener('resize', resizeTitleCanvas);
 
 const titleEl = document.getElementById('mainTitle');
-const nibEl   = document.getElementById('penNib');
 
 // ── Languages ────────────────────────────────────────────────
 const LANGUAGES = [
@@ -433,89 +478,7 @@ const LANGUAGES = [
   { text: '夕映えの学び',             dir: 'ltr', lang: 'ja' },
 ];
 
-// ── Stroke paths per character type ─────────────────────────
-// Points are normalized: x=0 left edge, x=1 right edge of char
-// y=0 top of ascender line, y=0.65 baseline, y=1 descender
-
-const STROKE = {
-  // tall ascender: touches up high then comes back down (h, b, d, l, f, k, t)
-  tall: [
-    {x:0.42,y:0.68},{x:0.38,y:0.05},{x:0.50,y:0.08},
-    {x:0.72,y:0.22},{x:0.78,y:0.44},{x:0.72,y:0.65}
-  ],
-  // round oval loop (a, o, c, e, g, s)
-  round: [
-    {x:0.78,y:0.40},{x:0.68,y:0.14},{x:0.46,y:0.06},
-    {x:0.20,y:0.18},{x:0.08,y:0.44},{x:0.20,y:0.70},
-    {x:0.46,y:0.82},{x:0.78,y:0.70},{x:0.92,y:0.65}
-  ],
-  // arch upward then down (n, m, r, u)
-  arch: [
-    {x:0.10,y:0.66},{x:0.10,y:0.34},{x:0.24,y:0.14},
-    {x:0.50,y:0.08},{x:0.76,y:0.14},{x:0.90,y:0.34},
-    {x:0.90,y:0.66}
-  ],
-  // diagonal sweep (v, w, x, y, z)
-  diag: [
-    {x:0.10,y:0.16},{x:0.50,y:0.66},{x:0.90,y:0.16}
-  ],
-  // simple short stroke (i, j)
-  simple: [
-    {x:0.50,y:0.22},{x:0.50,y:0.66}
-  ],
-  // default / capitals
-  cap: [
-    {x:0.50,y:0.05},{x:0.18,y:0.05},{x:0.08,y:0.36},
-    {x:0.30,y:0.54},{x:0.70,y:0.54},{x:0.92,y:0.72},
-    {x:0.50,y:0.82}
-  ],
-  // Arabic — right-to-left flowing
-  arabic: [
-    {x:0.94,y:0.48},{x:0.72,y:0.24},{x:0.50,y:0.14},
-    {x:0.28,y:0.28},{x:0.12,y:0.50},{x:0.22,y:0.72}
-  ],
-  // CJK — horizontal stroke then vertical
-  cjk: [
-    {x:0.12,y:0.26},{x:0.88,y:0.26},{x:0.50,y:0.26},
-    {x:0.50,y:0.82},{x:0.14,y:0.82},{x:0.86,y:0.82}
-  ],
-};
-
-const TALL   = new Set([...'bdfhklt']);
-const ROUND  = new Set([...'acegoqs']);
-const ARCH   = new Set([...'mnru']);
-const DIAG   = new Set([...'vwxyz']);
-const SIMPLE = new Set([...'ij']);
-
-function getStroke(char, lang) {
-  if (char === ' ') return null;
-  if (lang === 'ar') return STROKE.arabic;
-  const cp = char.codePointAt(0);
-  if ((cp >= 0x4E00 && cp <= 0x9FFF) ||
-      (cp >= 0x3040 && cp <= 0x30FF) ||
-      (cp >= 0xAC00 && cp <= 0xD7A3) ||
-      (cp >= 0x3000 && cp <= 0x303F)) return STROKE.cjk;
-  const lo = char.toLowerCase();
-  if (TALL.has(lo))   return STROKE.tall;
-  if (ROUND.has(lo))  return STROKE.round;
-  if (ARCH.has(lo))   return STROKE.arch;
-  if (DIAG.has(lo))   return STROKE.diag;
-  if (SIMPLE.has(lo)) return STROKE.simple;
-  return STROKE.cap;
-}
-
-// Linear interpolation along a polyline, t = 0..1
-function walkPath(pts, t) {
-  if (pts.length === 1) return pts[0];
-  const segs = pts.length - 1;
-  const s    = t * segs;
-  const i    = Math.min(Math.floor(s), segs - 1);
-  const f    = s - i;
-  return {
-    x: pts[i].x + (pts[i+1].x - pts[i].x) * f,
-    y: pts[i].y + (pts[i+1].y - pts[i].y) * f,
-  };
-}
+// ── Helpers ──────────────────────────────────────────────────
 
 function easeSinInOut(t) {
   return -(Math.cos(Math.PI * t) - 1) / 2;
@@ -523,17 +486,6 @@ function easeSinInOut(t) {
 
 function wait(ms) {
   return new Promise(r => setTimeout(r, ms));
-}
-
-// ── Render helpers ───────────────────────────────────────────
-
-function compositeReveal(textOff, revealOff) {
-  const W = titleCanvas.width, H = titleCanvas.height;
-  tCtx.clearRect(0, 0, W, H);
-  tCtx.drawImage(textOff, 0, 0);
-  tCtx.globalCompositeOperation = 'destination-in';
-  tCtx.drawImage(revealOff, 0, 0);
-  tCtx.globalCompositeOperation = 'source-over';
 }
 
 function fadeCanvasOut(duration) {
@@ -549,101 +501,119 @@ function fadeCanvasOut(duration) {
   });
 }
 
-// ── Main handwriting routine ─────────────────────────────────
+// ── Build animation tokens ───────────────────────────────────
+// Arabic → word-level tokens (preserves correct shaping).
+// CJK / Latin → character-level tokens.
 
-async function handwriteTitle(text, dir, lang, fontSpec, cx, cy, fontSize) {
-  const W = titleCanvas.width, H = titleCanvas.height;
-
-  // Offscreen: full text rendered once
-  const textOff    = document.createElement('canvas');
-  textOff.width    = W; textOff.height = H;
-  const toCtx      = textOff.getContext('2d');
-  toCtx.font       = fontSpec;
-  toCtx.fillStyle  = '#f4ead8';
-  toCtx.textAlign  = 'center';
-  toCtx.textBaseline = 'middle';
-  toCtx.direction  = dir;
-  toCtx.shadowColor  = 'rgba(255,172,65,0.42)';
-  toCtx.shadowBlur   = 18;
-  toCtx.shadowOffsetY = 2;
-  toCtx.fillText(text, cx, cy);
-
-  // Offscreen: reveal mask — starts empty, brush strokes accumulate
-  const revealOff   = document.createElement('canvas');
-  revealOff.width   = W; revealOff.height = H;
-  const rCtx        = revealOff.getContext('2d');
-  rCtx.fillStyle    = 'white';
-
-  // Measure where each character sits horizontally
-  const mCtx = document.createElement('canvas').getContext('2d');
-  mCtx.font  = fontSpec;
+function buildTokens(text, dir, lang, fontSpec, cx, cy) {
+  const mCtx    = document.createElement('canvas').getContext('2d');
+  mCtx.font      = fontSpec;
   mCtx.direction = dir;
 
   const totalW = mCtx.measureText(text).width;
-  const startX = cx - totalW / 2;  // left edge of text
+  const spaceW = mCtx.measureText(' ').width;
 
-  const brushR    = fontSize * 0.30;
-  const charH     = fontSize * 1.10;   // approx visual height
-  const charTopY  = cy - charH * 0.50; // top of ascender line
+  // Determine how to split
+  const rawParts = (lang === 'ar')
+    ? text.split(' ').filter(w => w.length > 0)   // Arabic: by word
+    : [...text];                                    // others: by char (Unicode-safe)
 
-  // Slow & elegant: 210ms per character, min 2800ms total
-  const totalDur  = Math.max(2800, text.length * 210);
-  const charDur   = totalDur / Math.max(text.length, 1);
+  const tokens = [];
 
-  titleCanvas.style.opacity = '1';
-  nibEl.style.opacity = '1';
-
-  for (let i = 0; i < text.length; i++) {
-    const ch  = text[i];
-    const pts = getStroke(ch, lang);
-
-    // Character x-start via cumulative measureText (handles kerning approx)
-    const charStartW = mCtx.measureText(dir === 'rtl' ? text.slice(i+1) : text.slice(0, i)).width;
-    const charW      = mCtx.measureText(ch).width;
-
-    const charLeft = dir === 'rtl'
-      ? startX + totalW - charStartW - charW
-      : startX + charStartW;
-
-    if (!pts || ch === ' ') {
-      // Space — just move nib across, no reveal needed
-      await wait(charDur * 0.4);
-      continue;
+  if (dir === 'rtl') {
+    // Place tokens right-to-left from the rightmost edge
+    let xCursor = cx + totalW / 2;
+    for (const part of rawParts) {
+      const pw = mCtx.measureText(part).width;
+      tokens.push({
+        text:   part,
+        finalX: xCursor - pw / 2,
+        finalY: cy,
+        w:      pw,
+        isGap:  false,
+      });
+      xCursor -= pw + spaceW;
     }
-
-    // Animate pen along this character's stroke path
-    await new Promise(resolve => {
-      const start = performance.now();
-      function frame(now) {
-        const raw  = Math.min((now - start) / charDur, 1);
-        const t    = easeSinInOut(raw);
-        const pt   = walkPath(pts, t);
-
-        // Convert normalized path point to screen coords
-        const sx = charLeft + pt.x * charW;
-        const sy = charTopY + pt.y * charH;
-
-        // Paint brush circle on reveal mask
-        rCtx.beginPath();
-        rCtx.arc(sx, sy, brushR, 0, Math.PI * 2);
-        rCtx.fill();
-
-        // Update nib position (small Y wobble for organic feel)
-        const wobble = Math.sin(raw * Math.PI * 5) * 3;
-        nibEl.style.left = sx + 'px';
-        nibEl.style.top  = (sy + wobble) + 'px';
-
-        // Composite text through reveal mask
-        compositeReveal(textOff, revealOff);
-
-        if (raw < 1) requestAnimationFrame(frame);
-        else resolve();
-      }
-      requestAnimationFrame(frame);
-    });
+  } else {
+    let xCursor = cx - totalW / 2;
+    for (const part of rawParts) {
+      const pw = mCtx.measureText(part).width;
+      tokens.push({
+        text:   part,
+        finalX: xCursor + pw / 2,
+        finalY: cy,
+        w:      pw,
+        isGap:  (part === ' '),
+      });
+      xCursor += pw;
+    }
   }
 
-  nibEl.style.opacity = '0';
+  // Assign starting offsets + stagger to visible tokens
+  const visible = tokens.filter(t => !t.isGap && t.text !== ' ');
+  visible.forEach((tk, i) => {
+    // Drift from slightly above, with gentle horizontal scatter
+    tk.startX = tk.finalX + (Math.random() - 0.5) * 50;
+    tk.startY = tk.finalY - (30 + Math.random() * 45);
+    // Sequential stagger — 80 ms between each, slight jitter
+    tk.delay  = i * 80 + Math.random() * 25;
+  });
+
+  return visible;
+}
+
+// ── Flowy animation ──────────────────────────────────────────
+
+async function flowyTitle(text, dir, lang, fontSpec, cx, cy) {
+  const W = titleCanvas.width;
+  const H = titleCanvas.height;
+
+  const tokens      = buildTokens(text, dir, lang, fontSpec, cx, cy);
+  const charDur     = 1300; // ms each token travels to its final position
+  titleCanvas.style.opacity = '1';
+
+  return new Promise(resolve => {
+    const start = performance.now();
+
+    function frame(now) {
+      const elapsed = now - start;
+      tCtx.clearRect(0, 0, W, H);
+
+      tCtx.font         = fontSpec;
+      tCtx.textAlign    = 'center';
+      tCtx.textBaseline = 'middle';
+      tCtx.direction    = dir;
+
+      let allDone = true;
+
+      for (const tk of tokens) {
+        const rawT = (elapsed - tk.delay) / charDur;
+        const t    = Math.max(0, Math.min(rawT, 1));
+        if (t < 1) allDone = false;
+
+        const te = easeSinInOut(t);
+
+        const x     = tk.startX + (tk.finalX - tk.startX) * te;
+        const y     = tk.startY + (tk.finalY - tk.startY) * te;
+        const alpha = te;
+        // Glow starts wide and soft, sharpens as letter settles
+        const blur  = 22 * (1 - te) + 14;
+
+        tCtx.save();
+        tCtx.globalAlpha = Math.max(0, alpha);
+        tCtx.shadowColor = 'rgba(255, 175, 70, 0.55)';
+        tCtx.shadowBlur  = blur;
+        tCtx.fillStyle   = '#f4ead8';
+        tCtx.fillText(tk.text, x, y);
+        tCtx.restore();
+      }
+
+      if (!allDone) requestAnimationFrame(frame);
+      else resolve();
+    }
+
+    requestAnimationFrame(frame);
+  });
 }
 
 // ── Title loop ───────────────────────────────────────────────
@@ -654,40 +624,36 @@ async function titleLoop() {
   while (true) {
     const { text, dir, lang } = LANGUAGES[langIndex];
 
-    // Prepare invisible h1 for font measurement
     titleEl.setAttribute('lang', lang);
     titleEl.setAttribute('dir',  dir);
     titleEl.textContent = text;
 
-    // Wait one frame for layout + font to apply
+    // Let layout & fonts settle
     await new Promise(r => requestAnimationFrame(r));
     await new Promise(r => requestAnimationFrame(r));
 
     const cs       = getComputedStyle(titleEl);
-    const fontSize = parseFloat(cs.fontSize);
     const fontSpec = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
     const rect     = titleEl.getBoundingClientRect();
     const cx       = window.innerWidth / 2;
     const cy       = rect.top + rect.height / 2;
 
-    // Reset canvas
     tCtx.clearRect(0, 0, titleCanvas.width, titleCanvas.height);
     titleCanvas.style.opacity = '0';
-    nibEl.style.opacity = '0';
 
-    await wait(300);
+    await wait(400);
 
-    await handwriteTitle(text, dir, lang, fontSpec, cx, cy, fontSize);
+    await flowyTitle(text, dir, lang, fontSpec, cx, cy);
 
-    // Hold
-    await wait(5000);
+    // Hold fully assembled
+    await wait(4500);
 
-    // Fade out
-    await fadeCanvasOut(1500);
+    // Gentle fade out
+    await fadeCanvasOut(1400);
     tCtx.clearRect(0, 0, titleCanvas.width, titleCanvas.height);
     titleEl.textContent = '';
 
-    await wait(500);
+    await wait(600);
     langIndex = (langIndex + 1) % LANGUAGES.length;
   }
 }
