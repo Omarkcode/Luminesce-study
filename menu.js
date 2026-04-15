@@ -29,11 +29,9 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   document.getElementById('menuGreeting').textContent = `${greeting}, ${name}`;
 
-  // Fade menu in gently
-  const wrap = document.getElementById('menuWrap');
-  wrap.style.transition = 'opacity 1.4s ease';
-  // Small delay so the background has a moment to paint first
-  setTimeout(() => { wrap.style.opacity = '1'; }, 300);
+  // Fade panel in gently after background has a moment to paint
+  const panel = document.getElementById('menuPanel');
+  setTimeout(() => { panel.style.opacity = '1'; }, 300);
 })();
 
 // ── Sign Out ──────────────────────────────────────────────────

@@ -1,0 +1,163 @@
+/* ============================================================
+   MENU PAGE — menu.css
+   ============================================================ */
+
+/* ── Full-screen blur layer (above canvases & moon) ──────────
+   backdrop-filter blurs everything rendered below this element.
+   ────────────────────────────────────────────────────────── */
+.bg-blur {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  backdrop-filter: blur(24px) saturate(0.75);
+  -webkit-backdrop-filter: blur(24px) saturate(0.75);
+  background: rgba(4, 8, 28, 0.48);
+  pointer-events: none;
+}
+
+/* ── Deep-blue panel ─────────────────────────────────────────
+   Covers most of the screen, floats above the blur layer.
+   ────────────────────────────────────────────────────────── */
+.menu-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+
+  width: min(840px, 90vw);
+  max-height: 88vh;
+  overflow-y: auto;
+
+  padding: 42px 44px 48px;
+
+  background: rgba(8, 14, 52, 0.82);
+  border: 1px solid rgba(80, 120, 230, 0.18);
+  border-radius: 28px;
+
+  box-shadow:
+    0 0  60px 16px rgba(40, 70, 200, 0.10),
+    0 0 120px 40px rgba(20, 40, 140, 0.08),
+    0 32px 80px      rgba(0,  0,   0, 0.55);
+
+  transition: opacity 1.3s ease;
+}
+
+/* ── Panel header ─────────────────────────────────────────── */
+.panel-header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.panel-title {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 700;
+  color: #f4ead8;
+  letter-spacing: 2px;
+  text-shadow:
+    0 0 18px rgba(255, 175, 70, 0.40),
+    0 0 38px rgba(255, 140, 40, 0.20);
+  margin-bottom: 6px;
+}
+
+.panel-greeting {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(1rem, 2.2vw, 1.4rem);
+  color: rgba(244, 234, 216, 0.46);
+  letter-spacing: 0.5px;
+}
+
+/* ── 3 × 2 grid ──────────────────────────────────────────── */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+
+/* ── Individual grid card ────────────────────────────────── */
+.grid-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  aspect-ratio: 1 / 1;
+
+  background: rgba(12, 20, 70, 0.60);
+  border: 1px solid rgba(80, 120, 230, 0.14);
+  border-radius: 18px;
+
+  color: rgba(210, 220, 255, 0.62);
+  cursor: default;          /* not interactive yet */
+
+  transition: background 0.25s ease, border-color 0.25s ease,
+              color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* Subtle hover glow — visual-only, no action attached */
+.grid-card:hover {
+  background: rgba(20, 34, 95, 0.72);
+  border-color: rgba(120, 160, 255, 0.28);
+  color: rgba(230, 238, 255, 0.85);
+  box-shadow:
+    0 0 22px 4px rgba(80, 120, 255, 0.10),
+    0 0 50px 14px rgba(50, 80, 200, 0.06);
+}
+
+/* Remove default button focus ring and replace with tasteful one */
+.grid-card:focus-visible {
+  outline: 2px solid rgba(255, 175, 70, 0.50);
+  outline-offset: 3px;
+}
+
+/* ── Icon wrapper ────────────────────────────────────────── */
+.grid-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Label ───────────────────────────────────────────────── */
+.grid-label {
+  font-family: 'Dancing Script', cursive;
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* ── Sign-out button (above panel) ──────────────────────── */
+.sign-out-btn {
+  position: fixed;
+  top: 22px;
+  right: 26px;
+  z-index: 20;
+  padding: 8px 22px;
+  font-size: 0.80rem;
+  letter-spacing: 0.5px;
+  color: rgba(244, 234, 216, 0.42);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 30px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
+
+.sign-out-btn:hover {
+  color: rgba(244, 234, 216, 0.85);
+  border-color: rgba(255, 175, 70, 0.30);
+  background: rgba(255, 175, 70, 0.06);
+}
+
+/* ── Responsive: 2-col on narrow screens ─────────────────── */
+@media (max-width: 520px) {
+  .menu-panel { padding: 30px 22px 36px; }
+  .menu-grid  { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+}
