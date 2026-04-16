@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Afterglow Study — Classic</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="classic.css" />
+</head>
+<body>
+
+  <!-- Unblurred starry background -->
+  <canvas id="skyCanvas"></canvas>
+  <canvas id="cityCanvas"></canvas>
+  <div class="moon" aria-hidden="true"></div>
+
+  <!-- ══ Sidebar ══════════════════════════════════════════════ -->
+  <nav class="sidebar" id="sidebar" aria-label="Study tools">
+
+    <div class="sb-top">
+      <!-- Timer -->
+      <button class="sb-btn" id="btnTimer" title="Timer" aria-label="Timer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+      </button>
+
+      <!-- Task List -->
+      <button class="sb-btn" id="btnTasks" title="Task List" aria-label="Task List">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 11 12 14 22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+      </button>
+
+      <!-- Music -->
+      <button class="sb-btn" id="btnMusic" title="Music" aria-label="Music">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18V5l12-2v13"/>
+          <circle cx="6"  cy="18" r="3"/>
+          <circle cx="18" cy="16" r="3"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Exit -->
+    <button class="sb-btn sb-exit" id="btnExit" title="Back to Menu" aria-label="Back to Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+    </button>
+
+  </nav>
+
+  <!-- ══ Timer Panel ══════════════════════════════════════════ -->
+  <div class="panel" id="panelTimer" hidden>
+    <div class="panel-handle">Timer</div>
+
+    <div class="timer-display">
+      <div class="timer-col">
+        <button class="timer-adj" data-field="h" data-delta="1">+</button>
+        <div class="timer-val" id="tH">00</div>
+        <button class="timer-adj" data-field="h" data-delta="-1">−</button>
+        <div class="timer-lbl">hr</div>
+      </div>
+      <span class="timer-sep">:</span>
+      <div class="timer-col">
+        <button class="timer-adj" data-field="m" data-delta="1">+</button>
+        <div class="timer-val" id="tM">25</div>
+        <button class="timer-adj" data-field="m" data-delta="-1">−</button>
+        <div class="timer-lbl">min</div>
+      </div>
+      <span class="timer-sep">:</span>
+      <div class="timer-col">
+        <button class="timer-adj" data-field="s" data-delta="1">+</button>
+        <div class="timer-val" id="tS">00</div>
+        <button class="timer-adj" data-field="s" data-delta="-1">−</button>
+        <div class="timer-lbl">sec</div>
+      </div>
+    </div>
+
+    <div class="timer-actions">
+      <button class="t-action" id="btnTimerStart">Start</button>
+      <button class="t-action t-action--ghost" id="btnTimerReset">Reset</button>
+    </div>
+  </div>
+
+  <!-- ══ Task List Panel ════════════════════════════════════════ -->
+  <div class="panel panel--tasks" id="panelTasks" hidden>
+    <div class="panel-handle">Task List</div>
+
+    <form class="task-form" id="taskForm">
+      <input class="task-input" type="text" id="taskInput"
+             placeholder="Add something to achieve…" autocomplete="off" />
+      <button class="task-add" type="submit" aria-label="Add task">+</button>
+    </form>
+
+    <ul class="task-list" id="taskList"></ul>
+  </div>
+
+  <!-- ══ Music Panel ════════════════════════════════════════════ -->
+  <div class="panel panel--music" id="panelMusic" hidden>
+    <div class="panel-handle">Music</div>
+    <div class="track-name" id="trackName">Café Lofi 1</div>
+    <div class="music-controls">
+      <button class="music-btn" id="btnPrev"      aria-label="Previous">&#8249;</button>
+      <button class="music-btn music-btn--play" id="btnPlayPause" aria-label="Play">&#9654;</button>
+      <button class="music-btn" id="btnNext"      aria-label="Next">&#8250;</button>
+    </div>
+    <audio id="audioEl" preload="none"></audio>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="background.js"></script>
+  <script src="classic.js"></script>
+</body>
+</html>

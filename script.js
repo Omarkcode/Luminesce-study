@@ -267,7 +267,7 @@ async function titleLoop() {
     await wait(400);
 
     await flowyTitle(text, dir, lang, fontSpec, cx, cy);
-    await wait(4500);
+    await wait(2500);
     await fadeCanvasOut(1400);
     tCtx.clearRect(0, 0, titleCanvas.width, titleCanvas.height);
     titleEl.textContent = '';
