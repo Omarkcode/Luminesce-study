@@ -8,11 +8,6 @@ const SUPABASE_URL = 'https://rdnswueidjqnxgkhvrjf.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_EWpwtIRhvsIQMbNaiKIrPg_vLbgOMNp';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// Already logged in? Skip the title screen and go straight to the menu.
-sb.auth.getSession().then(({ data: { session } }) => {
-  if (session) window.location.href = 'menu.html';
-});
-
 // ── Background ────────────────────────────────────────────────
 // (functions defined in background.js, loaded before this file)
 
@@ -22,8 +17,15 @@ startBackground();
 
 const authOverlay = document.getElementById('authOverlay');
 
-document.querySelector('.study-btn').addEventListener('click', () => {
-  authOverlay.classList.add('visible');
+// Study button: if already logged in go straight to menu,
+// otherwise open the sign-up / sign-in modal.
+document.querySelector('.study-btn').addEventListener('click', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    window.location.href = 'menu.html';
+  } else {
+    authOverlay.classList.add('visible');
+  }
 });
 
 document.getElementById('authClose').addEventListener('click', closeAuth);

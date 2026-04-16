@@ -74,14 +74,16 @@
       <!-- Flight -->
       <button class="grid-card" aria-disabled="true" tabindex="0">
         <div class="grid-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <!-- fuselage -->
-            <path d="M22 3L2 12.5l7 1.5 2 5 3-4"/>
-            <!-- wing -->
-            <path d="M9 14L6 20"/>
-            <!-- body detail -->
-            <path d="M14.5 10.5L19 6"/>
+            <!-- fuselage body -->
+            <path d="M2 12 Q7 8 14 8.5 L21 11 L21 13 L14 15.5 Q7 16 2 12Z"/>
+            <!-- main swept wing -->
+            <path d="M10 10 L6 18 L15 14"/>
+            <!-- tail vertical fin -->
+            <path d="M3.5 11.5 L2.5 8 L4.5 10.5"/>
+            <!-- tail horizontal fin -->
+            <path d="M3.5 12.5 L2.5 16 L4.5 13.5"/>
           </svg>
         </div>
         <span class="grid-label">Flight</span>
@@ -90,19 +92,20 @@
       <!-- Zen -->
       <button class="grid-card" aria-disabled="true" tabindex="0">
         <div class="grid-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <!-- trunk -->
-            <path d="M12 22 L12 14"/>
-            <path d="M12 18 C10 17 8 18 8 20"/>
-            <!-- lower foliage -->
-            <path d="M12 16 C9 14 7 11 9 8 C11 6 13 8 12 16"/>
-            <!-- upper foliage -->
-            <path d="M12 14 C15 12 17 9 15 6 C13 4 11 6 12 14"/>
-            <!-- top canopy -->
-            <path d="M12 11 C12 9 11 7 12 5 C13 3 14 5 12 11"/>
-            <!-- base -->
-            <line x1="8" y1="22" x2="16" y2="22"/>
+            <!-- ground line -->
+            <line x1="3" y1="22" x2="21" y2="22"/>
+            <!-- bottom rock (widest) -->
+            <rect x="4"    y="18.5" width="16" height="3.5" rx="1.8"/>
+            <!-- second rock -->
+            <rect x="6"    y="14.5" width="12" height="4"   rx="1.8"/>
+            <!-- third rock -->
+            <rect x="7.5"  y="11"   width="9"  height="3.5" rx="1.8"/>
+            <!-- fourth rock -->
+            <rect x="9"    y="7.5"  width="6"  height="3.5" rx="1.8"/>
+            <!-- top stone -->
+            <rect x="10.2" y="4.5"  width="3.6" height="3"  rx="1.5"/>
           </svg>
         </div>
         <span class="grid-label">Zen</span>
