@@ -53,6 +53,34 @@
           <circle cx="18" cy="16" r="3"/>
         </svg>
       </button>
+
+      <!-- Notes -->
+      <button class="sb-btn" id="btnNotes" title="Notes" aria-label="Notes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </button>
+
+      <!-- Focus Mode -->
+      <button class="sb-btn" id="btnDistraction" title="Focus Mode" aria-label="Focus Mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </button>
+
+      <!-- Deadline -->
+      <button class="sb-btn" id="btnDeadline" title="Deadline" aria-label="Deadline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </button>
     </div>
 
     <!-- Exit -->
@@ -110,6 +138,10 @@
     </form>
 
     <ul class="task-list" id="taskList"></ul>
+
+    <div class="task-footer">
+      <button class="panel-clear-btn" id="btnTasksClear">Clear all</button>
+    </div>
   </div>
 
   <!-- ══ Music Panel ════════════════════════════════════════════ -->
@@ -130,6 +162,40 @@
       <span class="mode-label" title="Cycle">&#10132;</span>
     </div>
   </div>
+
+  <!-- ══ Notes Panel ═══════════════════════════════════════════ -->
+  <div class="panel panel--notes" id="panelNotes" hidden>
+    <div class="panel-handle">Notes</div>
+    <textarea class="notes-area" id="notesArea" placeholder="Write anything…"></textarea>
+    <div class="task-footer">
+      <button class="panel-clear-btn" id="btnNotesClear">Clear</button>
+    </div>
+  </div>
+
+  <!-- ══ Focus Mode Panel ═══════════════════════════════════════ -->
+  <div class="panel panel--distraction" id="panelDistraction" hidden>
+    <div class="panel-handle">Focus Mode</div>
+    <div class="distraction-body">
+      <div class="distraction-icon">&#9673;</div>
+      <p class="distraction-status">Focus mode is active.<br>A gentle reminder will appear every 3 minutes.</p>
+    </div>
+  </div>
+
+  <!-- ══ Deadline Panel ════════════════════════════════════════ -->
+  <div class="panel panel--deadline" id="panelDeadline" hidden>
+    <div class="panel-handle">Deadline</div>
+    <div class="deadline-picker" id="deadlinePicker">
+      <input type="date" class="deadline-input" id="deadlineInput" />
+      <button class="deadline-submit" id="btnDeadlineSubmit">Set Deadline</button>
+    </div>
+    <div class="deadline-countdown" id="deadlineCountdown" hidden>
+      <div class="deadline-time" id="deadlineTime"></div>
+      <button class="panel-clear-btn" id="btnDeadlineClear">Clear</button>
+    </div>
+  </div>
+
+  <!-- ══ Focus toast notification ══════════════════════════════ -->
+  <div class="focus-toast" id="focusToast" hidden></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <script src="background.js"></script>

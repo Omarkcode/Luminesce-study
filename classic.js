@@ -38,6 +38,22 @@ function togglePanel(panelId, btnId) {
 document.getElementById('btnTimer').addEventListener('click', () => togglePanel('panelTimer', 'btnTimer'));
 document.getElementById('btnTasks').addEventListener('click', () => togglePanel('panelTasks', 'btnTasks'));
 document.getElementById('btnMusic').addEventListener('click', () => togglePanel('panelMusic', 'btnMusic'));
+document.getElementById('btnNotes').addEventListener('click', () => togglePanel('panelNotes', 'btnNotes'));
+document.getElementById('btnDeadline').addEventListener('click', () => togglePanel('panelDeadline', 'btnDeadline'));
+
+// Focus mode has its own handler so it can start/stop the reminder interval
+let distractionInterval = null;
+document.getElementById('btnDistraction').addEventListener('click', () => {
+  const panel = document.getElementById('panelDistraction');
+  const isOpening = panel.hidden;
+  togglePanel('panelDistraction', 'btnDistraction');
+  if (isOpening) {
+    distractionInterval = setInterval(showFocusToast, 3 * 60 * 1000);
+  } else {
+    clearInterval(distractionInterval);
+    distractionInterval = null;
+  }
+});
 
 // ── Drag-to-move panels ───────────────────────────────────────
 
@@ -138,38 +154,104 @@ renderTimer();
 
 // ── Task List ─────────────────────────────────────────────────
 
+const PRIORITY_ORDER = { red: 0, yellow: 1, green: 2, grey: 3 };
+
+let tasks = JSON.parse(localStorage.getItem('luminesce_tasks') || '[]');
+
+function saveTasks() {
+  localStorage.setItem('luminesce_tasks', JSON.stringify(tasks));
+}
+
+function renderTasks() {
+  const list = document.getElementById('taskList');
+  list.innerHTML = '';
+
+  [...tasks]
+    .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])
+    .forEach(task => {
+      const li = document.createElement('li');
+      li.className = 'task-item' + (task.done ? ' done' : '');
+
+      const chk = document.createElement('input');
+      chk.type = 'checkbox';
+      chk.className = 'task-check';
+      chk.checked = task.done;
+      chk.addEventListener('change', () => {
+        task.done = chk.checked;
+        saveTasks();
+        renderTasks();
+      });
+
+      const span = document.createElement('span');
+      span.className = 'task-text';
+      span.appendChild(document.createTextNode(task.text));
+
+      const del = document.createElement('button');
+      del.className = 'task-del';
+      del.textContent = '✕';
+      del.setAttribute('aria-label', 'Delete task');
+      del.addEventListener('click', () => {
+        tasks = tasks.filter(t => t.id !== task.id);
+        saveTasks();
+        renderTasks();
+      });
+
+      const dot = document.createElement('button');
+      dot.className = 'priority-dot priority-dot--' + task.priority;
+      dot.setAttribute('aria-label', 'Set priority');
+      dot.addEventListener('click', (e) => {
+        document.querySelectorAll('.priority-picker').forEach(p => p.remove());
+
+        const picker = document.createElement('div');
+        picker.className = 'priority-picker';
+
+        ['red', 'yellow', 'green', 'grey'].forEach(color => {
+          const opt = document.createElement('button');
+          opt.className = 'priority-opt priority-opt--' + color;
+          opt.setAttribute('aria-label', color + ' priority');
+          opt.addEventListener('click', () => {
+            task.priority = color;
+            saveTasks();
+            picker.remove();
+            renderTasks();
+          });
+          picker.appendChild(opt);
+        });
+
+        li.appendChild(picker);
+        e.stopPropagation();
+      });
+
+      li.append(chk, span, del, dot);
+      list.appendChild(li);
+    });
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.priority-picker').forEach(p => p.remove());
+});
+
 document.getElementById('taskForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const input = document.getElementById('taskInput');
   const text  = input.value.trim();
   if (!text) return;
 
-  const li = document.createElement('li');
-  li.className = 'task-item';
-
-  // Sanitise text before inserting
-  const safe = document.createTextNode(text);
-  const span = document.createElement('span');
-  span.className = 'task-text';
-  span.appendChild(safe);
-
-  const chk = document.createElement('input');
-  chk.type = 'checkbox';
-  chk.className = 'task-check';
-  chk.addEventListener('change', () => li.classList.toggle('done', chk.checked));
-
-  const del = document.createElement('button');
-  del.className = 'task-del';
-  del.textContent = '✕';
-  del.setAttribute('aria-label', 'Delete task');
-  del.addEventListener('click', () => li.remove());
-
-  li.append(chk, span, del);
-  document.getElementById('taskList').appendChild(li);
+  tasks.push({ id: Date.now(), text, done: false, priority: 'grey' });
+  saveTasks();
+  renderTasks();
 
   input.value = '';
   input.focus();
 });
+
+document.getElementById('btnTasksClear').addEventListener('click', () => {
+  tasks = [];
+  saveTasks();
+  renderTasks();
+});
+
+renderTasks();
 
 // ── Music ─────────────────────────────────────────────────────
 
@@ -233,4 +315,90 @@ document.getElementById('btnNext').addEventListener('click', () => {
 
 document.getElementById('modeSwitch').addEventListener('change', e => {
   cycleMode = e.target.checked;
+});
+
+// ── Notes ─────────────────────────────────────────────────────
+
+const notesArea = document.getElementById('notesArea');
+notesArea.value = localStorage.getItem('luminesce_notes') || '';
+notesArea.addEventListener('input', () => {
+  localStorage.setItem('luminesce_notes', notesArea.value);
+});
+
+document.getElementById('btnNotesClear').addEventListener('click', () => {
+  notesArea.value = '';
+  localStorage.setItem('luminesce_notes', '');
+});
+
+// ── Focus Mode (Distraction Blocker) ──────────────────────────
+
+function showFocusToast() {
+  const messages = [
+    'Stay focused — you\'re doing great!',
+    'Put distractions aside. You\'ve got this.',
+    'Keep going — stay on task!',
+    'Eyes on the goal. Stay present.',
+  ];
+  const toast = document.getElementById('focusToast');
+  toast.textContent = messages[Math.floor(Math.random() * messages.length)];
+  toast.hidden = false;
+  toast.classList.add('toast--visible');
+  setTimeout(() => {
+    toast.classList.remove('toast--visible');
+    setTimeout(() => { toast.hidden = true; }, 400);
+  }, 3500);
+}
+
+// ── Countdown to Deadline ─────────────────────────────────────
+
+let deadlineInterval = null;
+
+function showDeadlineCountdown(dateStr) {
+  const deadline = new Date(dateStr);
+  document.getElementById('deadlinePicker').hidden = true;
+  document.getElementById('deadlineCountdown').hidden = false;
+
+  function update() {
+    const diff = deadline - new Date();
+    if (diff <= 0) {
+      document.getElementById('deadlineTime').textContent = 'Deadline has passed!';
+      clearInterval(deadlineInterval);
+      return;
+    }
+    const days  = Math.floor(diff / 86400000);
+    const hours = Math.floor((diff % 86400000) / 3600000);
+    const mins  = Math.floor((diff % 3600000)  / 60000);
+    const secs  = Math.floor((diff % 60000)    / 1000);
+    document.getElementById('deadlineTime').textContent =
+      `${days}d  ${String(hours).padStart(2,'0')}h  ${String(mins).padStart(2,'0')}m  ${String(secs).padStart(2,'0')}s`;
+  }
+
+  update();
+  deadlineInterval = setInterval(update, 1000);
+}
+
+const savedDeadline = localStorage.getItem('luminesce_deadline');
+if (savedDeadline && new Date(savedDeadline) > new Date()) {
+  showDeadlineCountdown(savedDeadline);
+} else {
+  localStorage.removeItem('luminesce_deadline');
+}
+
+document.getElementById('btnDeadlineSubmit').addEventListener('click', () => {
+  const val = document.getElementById('deadlineInput').value;
+  if (!val) return;
+  const date = new Date(val);
+  date.setHours(23, 59, 59, 0);
+  const iso = date.toISOString();
+  localStorage.setItem('luminesce_deadline', iso);
+  clearInterval(deadlineInterval);
+  showDeadlineCountdown(iso);
+});
+
+document.getElementById('btnDeadlineClear').addEventListener('click', () => {
+  clearInterval(deadlineInterval);
+  localStorage.removeItem('luminesce_deadline');
+  document.getElementById('deadlineInput').value = '';
+  document.getElementById('deadlinePicker').hidden = false;
+  document.getElementById('deadlineCountdown').hidden = true;
 });
