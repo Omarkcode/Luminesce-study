@@ -40,6 +40,7 @@ document.getElementById('btnTasks').addEventListener('click',     () => togglePa
 document.getElementById('btnMusic').addEventListener('click',     () => togglePanel('panelMusic',       'btnMusic'));
 document.getElementById('btnNotes').addEventListener('click',     () => togglePanel('panelNotes',       'btnNotes'));
 document.getElementById('btnDeadline').addEventListener('click',  () => togglePanel('panelDeadline',    'btnDeadline'));
+document.getElementById('btnIntention').addEventListener('click', () => togglePanel('panelIntention',   'btnIntention'));
 
 // Focus mode starts/stops the distraction reminder interval
 let distractionInterval = null;
@@ -163,6 +164,7 @@ document.getElementById('btnPomoStart').addEventListener('click', () => {
         renderPomoTimers();
       } else {
         incrementTracker();
+        triggerIntentionReview();
         setPomoPhase('study');
         pomoSecsLeft = getStudyTime();
         renderPomoTimers();
@@ -445,3 +447,83 @@ document.getElementById('btnDeadlineClear').addEventListener('click', () => {
   document.getElementById('deadlinePicker').hidden = false;
   document.getElementById('deadlineCountdown').hidden = true;
 });
+
+// ── Session Intention ─────────────────────────────────────────
+
+function setIntentionState(state) {
+  document.getElementById('intentionInput').hidden  = state !== 'input';
+  document.getElementById('intentionLocked').hidden = state !== 'locked';
+  document.getElementById('intentionReview').hidden = state !== 'review';
+}
+
+function triggerIntentionReview() {
+  const text = document.getElementById('intentionText').value.trim();
+  if (!text) return;
+  document.getElementById('intentionReviewText').textContent = text;
+  setIntentionState('review');
+  const panel = document.getElementById('panelIntention');
+  if (panel.hidden) togglePanel('panelIntention', 'btnIntention');
+}
+
+const savedIntention = localStorage.getItem('luminesce_intention');
+if (savedIntention) document.getElementById('intentionText').value = savedIntention;
+
+document.getElementById('btnIntentionSet').addEventListener('click', () => {
+  const text = document.getElementById('intentionText').value.trim();
+  if (!text) return;
+  document.getElementById('intentionDisplay').textContent = text;
+  localStorage.setItem('luminesce_intention', text);
+  setIntentionState('locked');
+});
+
+document.getElementById('btnIntentionYes').addEventListener('click', () => {
+  const panel = document.getElementById('panelIntention');
+  panel.classList.add('intention--achieved');
+  setTimeout(() => {
+    panel.classList.remove('intention--achieved');
+    setIntentionState('input');
+  }, 900);
+});
+
+document.getElementById('btnIntentionNo').addEventListener('click', () => {
+  setIntentionState('input');
+});
+
+// ── Distraction Log ───────────────────────────────────────────
+
+let distractions = JSON.parse(localStorage.getItem('luminesce_distractions') || '[]');
+
+function saveDistractions() {
+  localStorage.setItem('luminesce_distractions', JSON.stringify(distractions));
+}
+
+function renderDistractions() {
+  const list = document.getElementById('distractionLogList');
+  list.innerHTML = '';
+  distractions.forEach(entry => {
+    const li = document.createElement('li');
+    li.className = 'distraction-log-item';
+    li.appendChild(document.createTextNode(entry.text));
+    list.appendChild(li);
+  });
+}
+
+document.getElementById('distractionLogForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = document.getElementById('distractionLogInput');
+  const text  = input.value.trim();
+  if (!text) return;
+  distractions.push({ id: Date.now(), text });
+  saveDistractions();
+  renderDistractions();
+  input.value = '';
+  input.focus();
+});
+
+document.getElementById('btnDistractionLogClear').addEventListener('click', () => {
+  distractions = [];
+  saveDistractions();
+  renderDistractions();
+});
+
+renderDistractions();

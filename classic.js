@@ -402,3 +402,42 @@ document.getElementById('btnDeadlineClear').addEventListener('click', () => {
   document.getElementById('deadlinePicker').hidden = false;
   document.getElementById('deadlineCountdown').hidden = true;
 });
+
+// ── Distraction Log ───────────────────────────────────────────
+
+let distractions = JSON.parse(localStorage.getItem('luminesce_distractions') || '[]');
+
+function saveDistractions() {
+  localStorage.setItem('luminesce_distractions', JSON.stringify(distractions));
+}
+
+function renderDistractions() {
+  const list = document.getElementById('distractionLogList');
+  list.innerHTML = '';
+  distractions.forEach(entry => {
+    const li = document.createElement('li');
+    li.className = 'distraction-log-item';
+    li.appendChild(document.createTextNode(entry.text));
+    list.appendChild(li);
+  });
+}
+
+document.getElementById('distractionLogForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = document.getElementById('distractionLogInput');
+  const text  = input.value.trim();
+  if (!text) return;
+  distractions.push({ id: Date.now(), text });
+  saveDistractions();
+  renderDistractions();
+  input.value = '';
+  input.focus();
+});
+
+document.getElementById('btnDistractionLogClear').addEventListener('click', () => {
+  distractions = [];
+  saveDistractions();
+  renderDistractions();
+});
+
+renderDistractions();

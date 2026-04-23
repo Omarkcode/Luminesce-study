@@ -179,6 +179,18 @@
       <div class="distraction-icon">&#9673;</div>
       <p class="distraction-status">Focus mode is active.<br>A gentle reminder will appear every 3 minutes.</p>
     </div>
+    <div class="distraction-log-section">
+      <div class="distraction-log-title">Distraction Log</div>
+      <form class="distraction-log-form" id="distractionLogForm">
+        <input class="distraction-log-input" type="text" id="distractionLogInput"
+               placeholder="Jot a distraction…" autocomplete="off" />
+        <button class="task-add" type="submit" aria-label="Log distraction">+</button>
+      </form>
+      <ul class="distraction-log-list" id="distractionLogList"></ul>
+      <div class="task-footer">
+        <button class="panel-clear-btn" id="btnDistractionLogClear">Clear all</button>
+      </div>
+    </div>
   </div>
 
   <!-- ══ Deadline Panel ════════════════════════════════════════ -->

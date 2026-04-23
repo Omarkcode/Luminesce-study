@@ -102,3 +102,73 @@
   color: rgba(244, 234, 216, 0.40);
   text-align: center;
 }
+
+/* ── SESSION INTENTION PANEL ─────────────────────────────────── */
+.panel--intention { min-width: 260px; }
+
+.intention-state {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.intention-textarea {
+  width: 100%;
+  min-height: 90px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(80,120,230,0.18);
+  border-radius: 10px;
+  color: #f4ead8;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  padding: 10px 12px;
+  resize: none;
+  outline: none;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.intention-textarea::placeholder { color: rgba(244, 234, 216, 0.25); }
+.intention-textarea:focus { border-color: rgba(255, 175, 70, 0.45); }
+
+.intention-actions { display: flex; }
+.intention-actions .t-action { flex: 1; }
+
+.intention-display {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.1rem;
+  color: rgba(244, 234, 216, 0.75);
+  line-height: 1.55;
+  text-align: center;
+  padding: 10px 4px;
+}
+
+.intention-display--review {
+  color: rgba(244, 234, 216, 0.55);
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+.intention-question {
+  font-size: 0.90rem;
+  color: rgba(244, 234, 216, 0.65);
+  text-align: center;
+  margin: 0;
+}
+
+.intention-review-btns {
+  display: flex;
+  gap: 8px;
+}
+.intention-review-btns .t-action { flex: 1; }
+
+@keyframes intention-achieved {
+  0%   { box-shadow: inset 0 0 0px rgba(255,196,90,0); background: transparent; }
+  40%  { box-shadow: inset 0 0 24px rgba(255,196,90,0.18); background: rgba(255,196,90,0.05); }
+  100% { box-shadow: inset 0 0 0px rgba(255,196,90,0); background: transparent; }
+}
+
+.intention--achieved {
+  animation: intention-achieved 0.9s ease-out forwards;
+}
