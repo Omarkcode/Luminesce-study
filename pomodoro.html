@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luminesce Study — Pomodoro</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="classic.css" />
+  <link rel="stylesheet" href="pomodoro.css" />
+</head>
+<body>
+
+  <!-- Unblurred starry background -->
+  <canvas id="skyCanvas"></canvas>
+  <canvas id="cityCanvas"></canvas>
+  <div class="moon" aria-hidden="true"></div>
+
+  <!-- ══ Sidebar ══════════════════════════════════════════════ -->
+  <nav class="sidebar" id="sidebar" aria-label="Study tools">
+
+    <div class="sb-top">
+
+      <!-- Pomodoro Timer -->
+      <button class="sb-btn" id="btnPomodoro" title="Pomodoro Timer" aria-label="Pomodoro Timer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 7 C12 5 10.5 3.5 9 2"/>
+          <path d="M12 7 C10 5 7 6 7 9"/>
+          <path d="M12 7 C14 5 17 6 17 9"/>
+          <circle cx="12" cy="16" r="7"/>
+        </svg>
+      </button>
+
+      <!-- Tomato Jar (tracker) -->
+      <button class="sb-btn" id="btnTracker" title="Tomato Jar" aria-label="Tomato Jar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3h8l1 3H7L8 3z"/>
+          <path d="M5 6h14l-2 15H7L5 6z"/>
+          <line x1="9" y1="11" x2="15" y2="11"/>
+        </svg>
+      </button>
+
+      <!-- Task List -->
+      <button class="sb-btn" id="btnTasks" title="Task List" aria-label="Task List">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 11 12 14 22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+      </button>
+
+      <!-- Music -->
+      <button class="sb-btn" id="btnMusic" title="Music" aria-label="Music">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 18V5l12-2v13"/>
+          <circle cx="6"  cy="18" r="3"/>
+          <circle cx="18" cy="16" r="3"/>
+        </svg>
+      </button>
+
+      <!-- Notes -->
+      <button class="sb-btn" id="btnNotes" title="Notes" aria-label="Notes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </button>
+
+      <!-- Focus Mode -->
+      <button class="sb-btn" id="btnDistraction" title="Focus Mode" aria-label="Focus Mode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </button>
+
+      <!-- Deadline -->
+      <button class="sb-btn" id="btnDeadline" title="Deadline" aria-label="Deadline">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </button>
+
+    </div>
+
+    <!-- Exit -->
+    <button class="sb-btn sb-exit" id="btnExit" title="Back to Menu" aria-label="Back to Menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12 19 5 12 12 5"/>
+      </svg>
+    </button>
+
+  </nav>
+
+  <!-- ══ Pomodoro Timer Panel ═══════════════════════════════════ -->
+  <div class="panel panel--pomodoro" id="panelPomodoro" hidden>
+    <div class="panel-handle">Pomodoro</div>
+    <div class="pomo-body">
+
+      <!-- Study side -->
+      <div class="pomo-section pomo-section--active" id="pomoStudySection">
+        <div class="pomo-section-label">Study</div>
+        <div class="pomo-toggle-row">
+          <span class="pomo-toggle-label">Short</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="studyModeSwitch" aria-label="Study duration">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="pomo-toggle-label">Long</span>
+        </div>
+        <div class="pomo-display" id="pomoStudyDisplay">20:00</div>
+      </div>
+
+      <div class="pomo-divider"></div>
+
+      <!-- Break side -->
+      <div class="pomo-section" id="pomoBreakSection">
+        <div class="pomo-section-label">Break</div>
+        <div class="pomo-toggle-row">
+          <span class="pomo-toggle-label">Short</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="breakModeSwitch" aria-label="Break duration">
+            <span class="toggle-slider"></span>
+          </label>
+          <span class="pomo-toggle-label">Long</span>
+        </div>
+        <div class="pomo-display" id="pomoBreakDisplay">05:00</div>
+      </div>
+
+    </div>
+    <div class="timer-actions">
+      <button class="t-action" id="btnPomoStart">Start</button>
+      <button class="t-action t-action--ghost" id="btnPomoReset">Reset</button>
+    </div>
+  </div>
+
+  <!-- ══ Tomato Jar Panel ═══════════════════════════════════════ -->
+  <div class="panel panel--tracker" id="panelTracker" hidden>
+    <div class="panel-handle">Tomato Jar</div>
+    <div class="tracker-body">
+      <div class="tracker-tomato">🍅</div>
+      <div class="tracker-count" id="trackerCount">—</div>
+      <div class="tracker-desc">sessions completed</div>
+    </div>
+  </div>
+
+  <!-- ══ Task List Panel ════════════════════════════════════════ -->
+  <div class="panel panel--tasks" id="panelTasks" hidden>
+    <div class="panel-handle">Task List</div>
+    <form class="task-form" id="taskForm">
+      <input class="task-input" type="text" id="taskInput"
+             placeholder="Add something to achieve…" autocomplete="off" />
+      <button class="task-add" type="submit" aria-label="Add task">+</button>
+    </form>
+    <ul class="task-list" id="taskList"></ul>
+    <div class="task-footer">
+      <button class="panel-clear-btn" id="btnTasksClear">Clear all</button>
+    </div>
+  </div>
+
+  <!-- ══ Music Panel ════════════════════════════════════════════ -->
+  <div class="panel panel--music" id="panelMusic" hidden>
+    <div class="panel-handle">Music</div>
+    <div class="track-name" id="trackName"></div>
+    <div class="music-controls">
+      <button class="music-btn" id="btnPrev"      aria-label="Previous">&#8249;</button>
+      <button class="music-btn music-btn--play" id="btnPlayPause" aria-label="Play">&#9654;</button>
+      <button class="music-btn" id="btnNext"      aria-label="Next">&#8250;</button>
+    </div>
+    <div class="mode-toggle">
+      <span class="mode-label" title="Loop">&#8734;</span>
+      <label class="toggle-switch">
+        <input type="checkbox" id="modeSwitch" aria-label="Playback mode">
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="mode-label" title="Cycle">&#10132;</span>
+    </div>
+  </div>
+
+  <!-- ══ Notes Panel ═══════════════════════════════════════════ -->
+  <div class="panel panel--notes" id="panelNotes" hidden>
+    <div class="panel-handle">Notes</div>
+    <textarea class="notes-area" id="notesArea" placeholder="Write anything…"></textarea>
+    <div class="task-footer">
+      <button class="panel-clear-btn" id="btnNotesClear">Clear</button>
+    </div>
+  </div>
+
+  <!-- ══ Focus Mode Panel ═══════════════════════════════════════ -->
+  <div class="panel panel--distraction" id="panelDistraction" hidden>
+    <div class="panel-handle">Focus Mode</div>
+    <div class="distraction-body">
+      <div class="distraction-icon">&#9673;</div>
+      <p class="distraction-status">Focus mode is active.<br>A gentle reminder will appear every 3 minutes.</p>
+    </div>
+  </div>
+
+  <!-- ══ Deadline Panel ════════════════════════════════════════ -->
+  <div class="panel panel--deadline" id="panelDeadline" hidden>
+    <div class="panel-handle">Deadline</div>
+    <div class="deadline-picker" id="deadlinePicker">
+      <input type="date" class="deadline-input" id="deadlineInput" />
+      <button class="deadline-submit" id="btnDeadlineSubmit">Set Deadline</button>
+    </div>
+    <div class="deadline-countdown" id="deadlineCountdown" hidden>
+      <div class="deadline-time" id="deadlineTime"></div>
+      <button class="panel-clear-btn" id="btnDeadlineClear">Clear</button>
+    </div>
+  </div>
+
+  <!-- ══ Focus toast notification ══════════════════════════════ -->
+  <div class="focus-toast" id="focusToast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="background.js"></script>
+  <script src="pomodoro.js"></script>
+</body>
+</html>

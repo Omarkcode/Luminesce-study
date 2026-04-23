@@ -1,0 +1,104 @@
+/* ============================================================
+   LUMINESCE STUDY — pomodoro.css
+   Pomodoro-specific styles only. Shared panel/sidebar styles
+   come from classic.css which is also loaded by this page.
+   ============================================================ */
+
+/* ── POMODORO TIMER PANEL ────────────────────────────────────── */
+.panel--pomodoro { min-width: 300px; }
+
+.pomo-body {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 16px 18px 8px;
+}
+
+.pomo-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px 14px;
+  border-radius: 12px;
+  transition: background 0.3s;
+}
+
+.pomo-section--active {
+  background: rgba(255, 175, 70, 0.07);
+}
+
+.pomo-section-label {
+  font-size: 0.72rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(180, 200, 255, 0.45);
+}
+
+.pomo-section--active .pomo-section-label {
+  color: rgba(255, 196, 90, 0.80);
+}
+
+.pomo-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.pomo-toggle-label {
+  font-size: 0.72rem;
+  color: rgba(210, 220, 255, 0.45);
+  user-select: none;
+}
+
+.pomo-display {
+  font-family: 'Dancing Script', cursive;
+  font-size: 2.2rem;
+  color: rgba(210, 220, 255, 0.50);
+  letter-spacing: 2px;
+  line-height: 1;
+  transition: color 0.3s;
+}
+
+.pomo-section--active .pomo-display {
+  color: #ffc860;
+}
+
+.pomo-divider {
+  width: 1px;
+  background: rgba(80, 120, 230, 0.15);
+  margin: 10px 4px;
+  align-self: stretch;
+}
+
+/* ── TOMATO JAR TRACKER PANEL ────────────────────────────────── */
+.panel--tracker { min-width: 200px; }
+
+.tracker-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 18px 20px 22px;
+}
+
+.tracker-tomato {
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.tracker-count {
+  font-family: 'Dancing Script', cursive;
+  font-size: 3rem;
+  color: #ffc860;
+  line-height: 1;
+  letter-spacing: 1px;
+}
+
+.tracker-desc {
+  font-size: 0.78rem;
+  letter-spacing: 0.5px;
+  color: rgba(244, 234, 216, 0.40);
+  text-align: center;
+}
