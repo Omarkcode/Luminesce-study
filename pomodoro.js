@@ -87,6 +87,26 @@ function makeDraggable(panel) {
 
 document.querySelectorAll('.panel').forEach(makeDraggable);
 
+// ── Ambient chime ─────────────────────────────────────────────
+
+function playChime() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const t = ctx.currentTime + i * 0.28;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.30, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
+    osc.start(t);
+    osc.stop(t + 1.4);
+  });
+}
+
 // ── Pomodoro Timer ────────────────────────────────────────────
 
 const STUDY_SHORT = 20 * 60;
@@ -158,6 +178,7 @@ document.getElementById('btnPomoStart').addEventListener('click', () => {
     renderPomoTimers();
 
     if (pomoSecsLeft <= 0) {
+      playChime();
       if (pomoPhase === 'study') {
         setPomoPhase('break');
         pomoSecsLeft = getBreakTime();
@@ -432,9 +453,7 @@ if (savedDeadline && new Date(savedDeadline) > new Date()) {
 document.getElementById('btnDeadlineSubmit').addEventListener('click', () => {
   const val = document.getElementById('deadlineInput').value;
   if (!val) return;
-  const date = new Date(val);
-  date.setHours(23, 59, 59, 0);
-  const iso = date.toISOString();
+  const iso = new Date(val).toISOString();
   localStorage.setItem('luminesce_deadline', iso);
   clearInterval(deadlineInterval);
   showDeadlineCountdown(iso);
@@ -458,7 +477,14 @@ function setIntentionState(state) {
 
 function triggerIntentionReview() {
   const text = document.getElementById('intentionText').value.trim();
-  if (!text) return;
+
+  // Pause the pomodoro so the next session doesn't start mid-review
+  clearInterval(pomoInterval);
+  pomoRunning = false;
+  document.getElementById('btnPomoStart').textContent = 'Start';
+
+  if (!text) return; // no intention set — just pause, no review needed
+
   document.getElementById('intentionReviewText').textContent = text;
   setIntentionState('review');
   const panel = document.getElementById('panelIntention');
