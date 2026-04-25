@@ -1,0 +1,279 @@
+/* ============================================================
+   study-buddy.css — Study Buddy chat page
+   ============================================================ */
+
+/* ── Warm lamp glow overlay ──────────────────────────────────── */
+.room-glow {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 90% 55% at 50% 100%,
+      rgba(255, 160, 40, 0.09) 0%,
+      rgba(255, 120, 20, 0.04) 45%,
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 40% 30% at 60% 20%,
+      rgba(255, 200, 100, 0.05) 0%,
+      transparent 60%
+    );
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ── Main content area (fills screen right of sidebar) ───────── */
+.sb-main {
+  position: fixed;
+  left: 90px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  z-index: 10;
+  overflow: hidden;
+}
+
+/* ── Chat wrapper (centered, max-width) ──────────────────────── */
+.sb-chat-wrap {
+  width: 100%;
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  padding: 0 28px;
+  overflow: hidden;
+}
+
+/* ── Chat page header ────────────────────────────────────────── */
+.sb-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 22px 0 16px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(255, 180, 80, 0.11);
+  margin-bottom: 4px;
+}
+
+.sb-buddy-icon {
+  width: 46px;
+  height: 46px;
+  background: rgba(255, 175, 70, 0.11);
+  border: 1px solid rgba(255, 175, 70, 0.22);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sb-buddy-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: rgba(255, 200, 100, 0.80);
+}
+
+.sb-chat-title {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.4rem;
+  color: rgba(255, 220, 160, 0.88);
+  line-height: 1;
+}
+
+.sb-chat-subtitle {
+  font-size: 0.76rem;
+  color: rgba(255, 200, 120, 0.36);
+  margin-top: 4px;
+}
+
+/* ── Messages scroll area ────────────────────────────────────── */
+.sb-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  scroll-behavior: smooth;
+}
+
+.sb-messages::-webkit-scrollbar       { width: 4px; }
+.sb-messages::-webkit-scrollbar-track { background: transparent; }
+.sb-messages::-webkit-scrollbar-thumb { background: rgba(255, 175, 70, 0.15); border-radius: 2px; }
+
+/* ── Message rows ────────────────────────────────────────────── */
+.msg {
+  display: flex;
+  gap: 10px;
+  max-width: 86%;
+  animation: msgFadeIn 0.22s ease;
+}
+
+@keyframes msgFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.msg--ai   { align-self: flex-start; align-items: flex-start; }
+.msg--user { align-self: flex-end;   flex-direction: row-reverse; }
+
+/* Avatar dot */
+.msg-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+.msg--ai   .msg-avatar {
+  background: rgba(255, 175, 70, 0.10);
+  border: 1px solid rgba(255, 175, 70, 0.18);
+  color: rgba(255, 200, 100, 0.70);
+}
+.msg--user .msg-avatar {
+  background: rgba(100, 140, 255, 0.09);
+  border: 1px solid rgba(100, 140, 255, 0.18);
+  color: rgba(150, 190, 255, 0.65);
+}
+
+/* Inner column (bubble + badges) */
+.msg-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Bubble */
+.msg-bubble {
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+.msg--ai .msg-bubble {
+  background: rgba(10, 16, 52, 0.78);
+  border: 1px solid rgba(80, 120, 230, 0.16);
+  color: rgba(244, 234, 216, 0.84);
+  border-top-left-radius: 5px;
+}
+
+.msg--user .msg-bubble {
+  background: rgba(255, 165, 45, 0.13);
+  border: 1px solid rgba(255, 165, 45, 0.26);
+  color: rgba(255, 215, 140, 0.90);
+  border-top-right-radius: 5px;
+}
+
+/* Markdown elements inside bubbles */
+.msg-bubble p       { margin: 0 0 10px; }
+.msg-bubble p:last-child { margin-bottom: 0; }
+.msg-bubble strong  { color: inherit; font-weight: 600; }
+.msg-bubble em      { font-style: italic; opacity: 0.88; }
+.msg-bubble code {
+  font-family: 'Courier New', monospace;
+  background: rgba(0, 0, 0, 0.28);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.82em;
+}
+
+/* Typing cursor animation */
+.typing-cursor::after {
+  content: '▋';
+  margin-left: 2px;
+  opacity: 0.6;
+  animation: cursorBlink 0.75s step-end infinite;
+}
+@keyframes cursorBlink {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 0; }
+}
+
+/* ── Panel-saved badge ───────────────────────────────────────── */
+.msg-panel-saved {
+  padding: 7px 12px;
+  background: rgba(80, 200, 120, 0.11);
+  border: 1px solid rgba(80, 200, 120, 0.26);
+  border-radius: 10px;
+  font-size: 0.77rem;
+  color: rgba(150, 240, 180, 0.82);
+  animation: msgFadeIn 0.3s ease;
+}
+
+/* ── Input bar ───────────────────────────────────────────────── */
+.sb-input-bar {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  padding: 12px 0 22px;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(255, 180, 80, 0.09);
+}
+
+.sb-input {
+  flex: 1;
+  background: rgba(10, 16, 52, 0.72);
+  border: 1px solid rgba(80, 120, 230, 0.22);
+  border-radius: 14px;
+  padding: 11px 16px;
+  color: rgba(244, 234, 216, 0.88);
+  font-size: 0.875rem;
+  font-family: inherit;
+  line-height: 1.55;
+  resize: none;
+  outline: none;
+  max-height: 140px;
+  overflow-y: auto;
+  transition: border-color 0.2s;
+}
+
+.sb-input:focus {
+  border-color: rgba(255, 175, 70, 0.38);
+}
+
+.sb-input::placeholder {
+  color: rgba(180, 190, 220, 0.26);
+}
+
+.sb-send {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  border: none;
+  background: rgba(255, 175, 70, 0.16);
+  color: #ffc860;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.sb-send:hover:not(:disabled) {
+  background: rgba(255, 175, 70, 0.28);
+}
+
+.sb-send:active:not(:disabled) {
+  transform: scale(0.94);
+}
+
+.sb-send svg {
+  width: 18px;
+  height: 18px;
+}
+
+.sb-send:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}

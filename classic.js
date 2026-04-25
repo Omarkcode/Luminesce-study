@@ -41,6 +41,13 @@ document.getElementById('btnMusic').addEventListener('click', () => togglePanel(
 document.getElementById('btnNotes').addEventListener('click', () => togglePanel('panelNotes', 'btnNotes'));
 document.getElementById('btnDeadline').addEventListener('click', () => togglePanel('panelDeadline', 'btnDeadline'));
 
+document.getElementById('btnKF').addEventListener('click', () => {
+  const panel = document.getElementById('kfPanel');
+  const open  = panel.hidden;
+  togglePanel('kfPanel', 'btnKF');
+  if (open) renderKnowledgeFinder(document.getElementById('kfList'));
+});
+
 // Focus mode has its own handler so it can start/stop the reminder interval
 let distractionInterval = null;
 document.getElementById('btnDistraction').addEventListener('click', () => {

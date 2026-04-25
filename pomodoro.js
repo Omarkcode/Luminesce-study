@@ -42,6 +42,13 @@ document.getElementById('btnNotes').addEventListener('click',     () => togglePa
 document.getElementById('btnDeadline').addEventListener('click',  () => togglePanel('panelDeadline',    'btnDeadline'));
 document.getElementById('btnIntention').addEventListener('click', () => togglePanel('panelIntention',   'btnIntention'));
 
+document.getElementById('btnKF').addEventListener('click', () => {
+  const panel = document.getElementById('kfPanel');
+  const open  = panel.hidden;
+  togglePanel('kfPanel', 'btnKF');
+  if (open) renderKnowledgeFinder(document.getElementById('kfList'));
+});
+
 // Focus mode starts/stops the distraction reminder interval
 let distractionInterval = null;
 document.getElementById('btnDistraction').addEventListener('click', () => {
