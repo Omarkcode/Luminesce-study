@@ -134,6 +134,8 @@
   justify-content: center;
 }
 
+.kp-overlay[hidden] { display: none; }
+
 .kp-modal {
   background: rgba(8, 11, 28, 0.97);
   border: 1px solid rgba(80, 120, 230, 0.22);
