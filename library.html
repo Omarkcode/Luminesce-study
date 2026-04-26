@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luminesce Study — Library</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="knowledge.css" />
+  <link rel="stylesheet" href="library.css" />
+</head>
+<body>
+
+  <!-- Starry background -->
+  <canvas id="skyCanvas"></canvas>
+  <canvas id="cityCanvas"></canvas>
+  <div class="moon" aria-hidden="true"></div>
+
+  <!-- Dark overlay so content is readable -->
+  <div class="lib-backdrop" aria-hidden="true"></div>
+
+  <!-- ══ Library Page ══════════════════════════════════════════ -->
+  <div class="lib-page" id="libPage" style="opacity:0">
+
+    <!-- Header -->
+    <header class="lib-header">
+      <button class="lib-back" id="btnBack">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+             width="14" height="14">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Menu
+      </button>
+      <h1 class="lib-title">Library</h1>
+      <button class="lib-btn-new-shelf" id="btnNewShelf">+ New Shelf</button>
+    </header>
+
+    <!-- Content -->
+    <main class="lib-content" id="libContent">
+      <div class="lib-loading">Loading…</div>
+    </main>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="background.js"></script>
+  <script src="knowledge.js"></script>
+  <script src="library.js"></script>
+</body>
+</html>

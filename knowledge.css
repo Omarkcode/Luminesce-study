@@ -42,6 +42,21 @@
 .kf-list::-webkit-scrollbar-track { background: transparent; }
 .kf-list::-webkit-scrollbar-thumb { background: rgba(80,120,230,0.20); border-radius: 2px; }
 
+.kf-shelf-header {
+  font-size: 0.68rem;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(255, 175, 70, 0.42);
+  padding: 10px 2px 4px;
+  border-top: 1px solid rgba(80, 120, 230, 0.08);
+  margin-top: 2px;
+}
+.kf-list > .kf-shelf-header:first-child {
+  border-top: none;
+  padding-top: 2px;
+  margin-top: 0;
+}
+
 .kf-empty {
   text-align: center;
   color: rgba(244, 234, 216, 0.30);

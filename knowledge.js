@@ -43,9 +43,22 @@ async function loadKnowledgePanels() {
   return data || [];
 }
 
+async function loadShelves() {
+  const { data: { user } } = await _kbSb.auth.getUser();
+  if (!user) return [];
+  const { data, error } = await _kbSb
+    .from('shelves')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at');
+  if (error) return [];
+  return data || [];
+}
+
 async function renderKnowledgeFinder(listEl) {
   listEl.innerHTML = '<div class="kf-empty">Loading…</div>';
-  const panels = await loadKnowledgePanels();
+
+  const [shelves, panels] = await Promise.all([loadShelves(), loadKnowledgePanels()]);
 
   if (panels.length === 0) {
     listEl.innerHTML = '<div class="kf-empty">No knowledge panels yet.<br>Ask Study Buddy to create one!</div>';
@@ -53,42 +66,74 @@ async function renderKnowledgeFinder(listEl) {
   }
 
   listEl.innerHTML = '';
-  panels.forEach(panel => {
-    const count = panel.questions?.length || 0;
-    const icon  = panel.type === 'flashcard' ? '🃏' : '📝';
-    const label = panel.type === 'flashcard' ? `${count} card${count !== 1 ? 's' : ''}` : `${count} question${count !== 1 ? 's' : ''}`;
 
-    const card = document.createElement('div');
-    card.className = 'kf-card';
-    card.draggable = true;
-    card.innerHTML = `
-      <div class="kf-card-top">
-        <span class="kf-card-icon">${icon}</span>
-        <span class="kf-card-name">${escKf(panel.name)}</span>
-      </div>
-      <div class="kf-card-meta">${label}${window.KF_EDIT_MODE ? ' · drag to chat to edit' : ''}</div>
-      <div class="kf-card-btns">
-        <button class="kf-btn kf-btn--play" data-id="${panel.id}">▶ Play</button>
-        ${window.KF_EDIT_MODE ? `<button class="kf-btn kf-btn--edit" data-id="${panel.id}">✦ Edit</button>` : ''}
-      </div>
-    `;
+  // Track which panels have been placed in a shelf
+  const placed = new Set();
 
-    card.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('application/json', JSON.stringify(panel));
-      e.dataTransfer.effectAllowed = 'copy';
-      card.style.opacity = '0.45';
-    });
-    card.addEventListener('dragend', () => { card.style.opacity = ''; });
+  shelves.forEach(shelf => {
+    const shelfPanels = panels.filter(p => p.shelf_id === shelf.id);
+    if (shelfPanels.length === 0) return;
 
-    card.querySelector('.kf-btn--play').addEventListener('click', () => openPlayer(panel));
-    if (window.KF_EDIT_MODE) {
-      card.querySelector('.kf-btn--edit').addEventListener('click', () => {
-        if (typeof window.onKnowledgePanelEdit === 'function') window.onKnowledgePanelEdit(panel);
-      });
-    }
+    shelfPanels.forEach(p => placed.add(p.id));
 
-    listEl.appendChild(card);
+    const header = document.createElement('div');
+    header.className = 'kf-shelf-header';
+    header.textContent = `📚 ${shelf.name}`;
+    listEl.appendChild(header);
+
+    shelfPanels.forEach(p => appendKfCard(p, listEl));
   });
+
+  // Unsorted panels
+  const unsorted = panels.filter(p => !placed.has(p.id));
+  if (unsorted.length > 0) {
+    if (placed.size > 0) {
+      const header = document.createElement('div');
+      header.className = 'kf-shelf-header';
+      header.textContent = '📂 Unsorted';
+      listEl.appendChild(header);
+    }
+    unsorted.forEach(p => appendKfCard(p, listEl));
+  }
+}
+
+function appendKfCard(panel, listEl) {
+  const count = panel.questions?.length || 0;
+  const icon  = panel.type === 'flashcard' ? '🃏' : '📝';
+  const label = panel.type === 'flashcard'
+    ? `${count} card${count !== 1 ? 's' : ''}`
+    : `${count} question${count !== 1 ? 's' : ''}`;
+
+  const card = document.createElement('div');
+  card.className = 'kf-card';
+  card.draggable = true;
+  card.innerHTML = `
+    <div class="kf-card-top">
+      <span class="kf-card-icon">${icon}</span>
+      <span class="kf-card-name">${escKf(panel.name)}</span>
+    </div>
+    <div class="kf-card-meta">${label}${window.KF_EDIT_MODE ? ' · drag to chat to edit' : ''}</div>
+    <div class="kf-card-btns">
+      <button class="kf-btn kf-btn--play" data-id="${panel.id}">▶ Play</button>
+      ${window.KF_EDIT_MODE ? `<button class="kf-btn kf-btn--edit" data-id="${panel.id}">✦ Edit</button>` : ''}
+    </div>
+  `;
+
+  card.addEventListener('dragstart', (e) => {
+    e.dataTransfer.setData('application/json', JSON.stringify(panel));
+    e.dataTransfer.effectAllowed = 'copy';
+    card.style.opacity = '0.45';
+  });
+  card.addEventListener('dragend', () => { card.style.opacity = ''; });
+
+  card.querySelector('.kf-btn--play').addEventListener('click', () => openPlayer(panel));
+  if (window.KF_EDIT_MODE) {
+    card.querySelector('.kf-btn--edit').addEventListener('click', () => {
+      if (typeof window.onKnowledgePanelEdit === 'function') window.onKnowledgePanelEdit(panel);
+    });
+  }
+
+  listEl.appendChild(card);
 }
 
 function escKf(str) {
