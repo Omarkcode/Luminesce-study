@@ -859,7 +859,7 @@ function openJoinModal() {
     });
 
     if (joinErr) {
-      showToast('Could not join group. Try again.');
+      showToast('Join error: ' + (joinErr.message || joinErr.code || 'unknown'));
       closeModal();
       return;
     }
