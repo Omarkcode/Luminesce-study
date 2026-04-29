@@ -173,7 +173,7 @@ function renderDetail(group, members, branches) {
   `;
 
   // Render branches
-  renderBranchList(branches);
+  renderBranchList(branches).catch(console.error);
 
   // Render members
   const membersList = document.getElementById('grpMembersList');
@@ -410,7 +410,29 @@ function openEditBranchModal(branch) {
   });
 }
 
-function renderBranchList(branches) {
+function markBranchRead(branchId) {
+  localStorage.setItem(`luminesce_read_${currentUser.id}_${branchId}`, new Date().toISOString());
+}
+
+function getBranchReadTime(branchId) {
+  return localStorage.getItem(`luminesce_read_${currentUser.id}_${branchId}`);
+}
+
+async function getLatestMessageTimes(branchIds) {
+  if (!branchIds.length) return {};
+  const { data } = await sb
+    .from('branch_messages')
+    .select('branch_id, created_at')
+    .in('branch_id', branchIds)
+    .order('created_at', { ascending: false });
+  const latest = {};
+  (data || []).forEach(msg => {
+    if (!latest[msg.branch_id]) latest[msg.branch_id] = msg.created_at;
+  });
+  return latest;
+}
+
+async function renderBranchList(branches) {
   const list = document.getElementById('grpBranchList');
   if (!list) return;
 
@@ -428,6 +450,8 @@ function renderBranchList(branches) {
     return;
   }
 
+  const latestTimes = await getLatestMessageTimes(visible.map(b => b.id));
+
   const categories = [...new Set(visible.map(b => b.category || ''))];
   categories.forEach(cat => {
     if (cat) {
@@ -437,11 +461,16 @@ function renderBranchList(branches) {
       list.appendChild(catEl);
     }
     visible.filter(b => (b.category || '') === cat).forEach(b => {
+      const latest   = latestTimes[b.id];
+      const readTime = getBranchReadTime(b.id);
+      const unread   = latest && (selectedBranch?.id !== b.id) && (!readTime || latest > readTime);
+
       const item = document.createElement('div');
       item.className = 'grp-branch-item' + (selectedBranch?.id === b.id ? ' grp-branch-item--active' : '');
       item.innerHTML = `
         <span class="grp-branch-hash">#</span>
         <span class="grp-branch-name">${escGrp(b.name)}</span>
+        ${unread ? `<span class="grp-branch-unread"></span>` : ''}
         ${isOwner ? `<button class="grp-branch-settings" title="Edit branch">⚙</button>` : ''}
       `;
       item.addEventListener('click', (e) => {
@@ -468,6 +497,7 @@ async function showBranchChat(branch) {
   const main = document.getElementById('grpChatMain');
   if (!main) return;
   pendingAttachment = null;
+  markBranchRead(branch.id);
 
   main.innerHTML = `
     <div class="grp-chat-header">

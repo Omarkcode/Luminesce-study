@@ -282,6 +282,16 @@
 .grp-branch-item--active .grp-branch-name { color: rgba(255, 215, 140, 0.88); }
 .grp-branch-item--active .grp-branch-hash { color: rgba(255, 175, 70, 0.50); }
 
+.grp-branch-unread {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f5c842;
+  flex-shrink: 0;
+  margin-left: auto;
+  margin-right: 2px;
+}
+
 .grp-branch-settings {
   background: none;
   border: none;
