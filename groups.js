@@ -521,7 +521,7 @@ async function showBranchChat(branch) {
   msgArea.innerHTML = '';
   renderedMsgIds = new Set();
   messages.forEach(m => appendMessage(m));
-  msgArea.scrollTop = msgArea.scrollHeight;
+  setTimeout(scrollToBottom, 0);
 
   subscribeToBranch(branch);
 }
@@ -682,6 +682,11 @@ function appendMessage(msg) {
 
   messages.appendChild(div);
   messages.scrollTop = messages.scrollHeight;
+}
+
+function scrollToBottom() {
+  const messages = document.getElementById('grpMessages');
+  if (messages) messages.scrollTop = messages.scrollHeight;
 }
 
 function formatTime(iso) {
