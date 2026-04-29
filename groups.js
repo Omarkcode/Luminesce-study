@@ -658,6 +658,26 @@ function appendMessage(msg) {
     div.querySelector('.grp-message-panel-play').addEventListener('click', () => {
       openPlayer(msg.attachment);
     });
+
+    div.querySelector('.grp-message-panel-save').addEventListener('click', async (e) => {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      const { error } = await sb.from('knowledge_panels').insert({
+        user_id:   currentUser.id,
+        name:      msg.attachment.name,
+        type:      msg.attachment.type,
+        questions: msg.attachment.questions
+      });
+      if (error) {
+        showToast('Could not save panel.');
+        btn.disabled = false;
+        btn.textContent = 'Save';
+      } else {
+        btn.textContent = 'Saved ✓';
+        showToast(`"${msg.attachment.name}" saved to your library!`);
+      }
+    });
   }
 
   messages.appendChild(div);
