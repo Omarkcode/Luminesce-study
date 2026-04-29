@@ -741,6 +741,95 @@
   padding: 40px 0;
 }
 
+/* ── Chat input ──────────────────────────────────────────────── */
+.grp-chat-input-wrap {
+  margin-top: 16px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.grp-chat-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(10, 16, 50, 0.70);
+  border: 1px solid rgba(80, 120, 230, 0.20);
+  border-radius: 12px;
+  padding: 6px 8px 6px 10px;
+}
+
+.grp-attach-btn {
+  background: none;
+  border: none;
+  font-size: 1.05rem;
+  cursor: pointer;
+  opacity: 0.50;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+  padding: 2px 4px;
+}
+.grp-attach-btn:hover { opacity: 0.90; }
+
+.grp-chat-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: rgba(244, 234, 216, 0.88);
+  font-size: 0.88rem;
+  font-family: inherit;
+}
+.grp-chat-input::placeholder { color: rgba(180, 200, 255, 0.22); }
+
+.grp-send-btn {
+  background: rgba(255, 175, 70, 0.14);
+  border: 1px solid rgba(255, 175, 70, 0.28);
+  border-radius: 8px;
+  color: #ffc860;
+  font-size: 0.80rem;
+  font-family: inherit;
+  padding: 5px 14px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+.grp-send-btn:hover { background: rgba(255, 175, 70, 0.24); }
+
+/* ── Attachment preview chip ─────────────────────────────────── */
+.grp-attachment-preview {
+  padding: 0 2px;
+}
+
+.grp-attach-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 175, 70, 0.09);
+  border: 1px solid rgba(255, 175, 70, 0.22);
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 0.78rem;
+  color: rgba(255, 210, 130, 0.82);
+}
+
+.grp-attach-chip-count {
+  color: rgba(180, 200, 255, 0.38);
+  font-size: 0.72rem;
+}
+
+.grp-attach-chip-remove {
+  background: none;
+  border: none;
+  color: rgba(255, 140, 140, 0.50);
+  cursor: pointer;
+  font-size: 0.72rem;
+  padding: 0 2px;
+  transition: color 0.15s;
+}
+.grp-attach-chip-remove:hover { color: rgba(255, 140, 140, 0.90); }
+
 /* ── Toast ───────────────────────────────────────────────────── */
 .grp-toast {
   position: fixed;

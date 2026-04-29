@@ -13,6 +13,7 @@ let currentUser     = null;
 let myGroups        = [];
 let selectedGroupId = null;
 let selectedBranch  = null;
+let pendingAttachment = null;
 
 // ── Init ──────────────────────────────────────────────────────
 
@@ -354,6 +355,7 @@ function renderBranchList(branches) {
 function showBranchChat(branch) {
   const main = document.getElementById('grpChatMain');
   if (!main) return;
+  pendingAttachment = null;
 
   main.innerHTML = `
     <div class="grp-chat-header">
@@ -364,7 +366,92 @@ function showBranchChat(branch) {
     <div class="grp-messages" id="grpMessages">
       <div class="grp-messages-empty">No messages yet — say hello!</div>
     </div>
+    <div class="grp-chat-input-wrap">
+      <div class="grp-attachment-preview" id="grpAttachPreview" hidden></div>
+      <div class="grp-chat-input-row">
+        <button class="grp-attach-btn" id="btnAttachPanel" title="Attach a knowledge panel">📎</button>
+        <input class="grp-chat-input" id="grpChatInput"
+               placeholder="Message #${escGrp(branch.name)}…" autocomplete="off" />
+        <button class="grp-send-btn" id="btnSendMsg">Send</button>
+      </div>
+    </div>
   `;
+
+  document.getElementById('btnAttachPanel').addEventListener('click', openAttachPanelPicker);
+  document.getElementById('grpChatInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) e.preventDefault();
+  });
+}
+
+async function openAttachPanelPicker() {
+  showModal(`
+    <div class="grp-modal-title">Attach a Panel</div>
+    <div class="grp-loading" style="padding:16px 0">Loading your panels…</div>
+  `);
+
+  const panels = await loadKnowledgePanels();
+
+  if (panels.length === 0) {
+    document.getElementById('grpModal').innerHTML = `
+      <div class="grp-modal-title">Attach a Panel</div>
+      <p class="grp-modal-desc">You don't have any knowledge panels yet.</p>
+      <div class="grp-modal-btns">
+        <button class="grp-btn grp-btn--ghost" id="btnModalCancel">Close</button>
+      </div>
+    `;
+    document.getElementById('btnModalCancel').addEventListener('click', closeModal);
+    return;
+  }
+
+  document.getElementById('grpModal').innerHTML = `
+    <div class="grp-modal-title">Attach a Panel</div>
+    <p class="grp-modal-desc">Pick a panel to attach to your message.</p>
+    <div class="grp-share-list" id="grpAttachList"></div>
+    <div class="grp-modal-btns">
+      <button class="grp-btn grp-btn--ghost" id="btnModalCancel">Cancel</button>
+    </div>
+  `;
+  document.getElementById('btnModalCancel').addEventListener('click', closeModal);
+
+  const list = document.getElementById('grpAttachList');
+  panels.forEach(p => {
+    const icon  = p.type === 'flashcard' ? '🃏' : '📝';
+    const count = p.questions?.length || 0;
+    const row   = document.createElement('div');
+    row.className = 'grp-share-row';
+    row.innerHTML = `
+      <span class="grp-share-icon">${icon}</span>
+      <span class="grp-share-name">${escGrp(p.name)}</span>
+      <span class="grp-share-count">${count} ${p.type === 'flashcard' ? 'cards' : 'qs'}</span>
+      <button class="grp-btn grp-btn--amber grp-share-btn">Attach</button>
+    `;
+    row.querySelector('.grp-share-btn').addEventListener('click', () => {
+      pendingAttachment = p;
+      closeModal();
+      renderAttachmentPreview(p);
+    });
+    list.appendChild(row);
+  });
+}
+
+function renderAttachmentPreview(panel) {
+  const preview = document.getElementById('grpAttachPreview');
+  if (!preview) return;
+  const icon  = panel.type === 'flashcard' ? '🃏' : '📝';
+  const count = panel.questions?.length || 0;
+  preview.hidden = false;
+  preview.innerHTML = `
+    <span class="grp-attach-chip">
+      ${icon} ${escGrp(panel.name)}
+      <span class="grp-attach-chip-count">${count} ${panel.type === 'flashcard' ? 'cards' : 'qs'}</span>
+      <button class="grp-attach-chip-remove" id="btnRemoveAttach">✕</button>
+    </span>
+  `;
+  document.getElementById('btnRemoveAttach').addEventListener('click', () => {
+    pendingAttachment = null;
+    preview.hidden = true;
+    preview.innerHTML = '';
+  });
 }
 
 function showDetailEmpty() {
