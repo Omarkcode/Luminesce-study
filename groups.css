@@ -290,6 +290,14 @@
   color: rgba(180, 200, 255, 0.20);
 }
 
+.grp-branch-empty {
+  padding: 16px 8px;
+  font-size: 0.76rem;
+  color: rgba(244, 234, 216, 0.18);
+  text-align: center;
+  font-style: italic;
+}
+
 /* ── Chat main area ──────────────────────────────────────────── */
 .grp-chat-main {
   flex: 1;

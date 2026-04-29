@@ -112,15 +112,16 @@ async function selectGroup(group) {
   const detail = document.getElementById('grpDetail');
   detail.innerHTML = '<div class="grp-loading">Loading…</div>';
 
-  const [{ data: members }, { data: panels }] = await Promise.all([
+  const [{ data: members }, { data: panels }, { data: branches }] = await Promise.all([
     sb.from('group_members').select('*').eq('group_id', group.id).order('joined_at'),
-    sb.from('group_panels').select('*').eq('group_id', group.id).order('shared_at', { ascending: false })
+    sb.from('group_panels').select('*').eq('group_id', group.id).order('shared_at', { ascending: false }),
+    sb.from('group_branches').select('*').eq('group_id', group.id).order('created_at')
   ]);
 
-  renderDetail(group, members || [], panels || []);
+  renderDetail(group, members || [], panels || [], branches || []);
 }
 
-function renderDetail(group, members, panels) {
+function renderDetail(group, members, panels, branches) {
   const isOwner = group.created_by === currentUser.id;
   const detail  = document.getElementById('grpDetail');
 
@@ -146,16 +147,7 @@ function renderDetail(group, members, panels) {
           <span>Branches</span>
           <button class="grp-branch-add" id="btnAddBranch">+</button>
         </div>
-        <div class="grp-branch-list" id="grpBranchList">
-          <div class="grp-branch-item">
-            <span class="grp-branch-hash">#</span>
-            <span class="grp-branch-name">general</span>
-          </div>
-          <div class="grp-branch-item">
-            <span class="grp-branch-hash">#</span>
-            <span class="grp-branch-name">study-notes</span>
-          </div>
-        </div>
+        <div class="grp-branch-list" id="grpBranchList"></div>
       </nav>
 
       <div class="grp-chat-main" id="grpChatMain">
@@ -183,6 +175,9 @@ function renderDetail(group, members, panels) {
 
     </div>
   `;
+
+  // Render branches
+  renderBranchList(branches);
 
   // Render members
   const membersList = document.getElementById('grpMembersList');
@@ -257,6 +252,36 @@ function renderDetail(group, members, panels) {
 
   document.getElementById('btnSharePanel').addEventListener('click', () => {
     openShareModal(group);
+  });
+}
+
+function renderBranchList(branches) {
+  const list = document.getElementById('grpBranchList');
+  if (!list) return;
+
+  if (branches.length === 0) {
+    list.innerHTML = '<div class="grp-branch-empty">No branches yet.</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  const categories = [...new Set(branches.map(b => b.category || ''))];
+  categories.forEach(cat => {
+    if (cat) {
+      const catEl = document.createElement('div');
+      catEl.className = 'grp-branch-category';
+      catEl.textContent = cat;
+      list.appendChild(catEl);
+    }
+    branches.filter(b => (b.category || '') === cat).forEach(b => {
+      const item = document.createElement('div');
+      item.className = 'grp-branch-item';
+      item.innerHTML = `
+        <span class="grp-branch-hash">#</span>
+        <span class="grp-branch-name">${escGrp(b.name)}</span>
+      `;
+      list.appendChild(item);
+    });
   });
 }
 
