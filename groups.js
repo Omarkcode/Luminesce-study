@@ -923,13 +923,19 @@ function generateCode() {
 
 function showToast(msg) {
   const toast = document.getElementById('grpToast');
-  toast.textContent = msg;
   toast.hidden = false;
   toast.classList.add('grp-toast--visible');
+  toast.innerHTML = `
+    <span class="grp-toast-msg">${msg}</span>
+    <button class="grp-toast-copy" title="Copy">📋</button>
+  `;
+  toast.querySelector('.grp-toast-copy').addEventListener('click', () => {
+    navigator.clipboard.writeText(msg).catch(() => {});
+  });
   setTimeout(() => {
     toast.classList.remove('grp-toast--visible');
     setTimeout(() => { toast.hidden = true; }, 300);
-  }, 2800);
+  }, 5000);
 }
 
 // ── Utils ─────────────────────────────────────────────────────

@@ -943,15 +943,29 @@
   background: rgba(8, 11, 28, 0.96);
   border: 1px solid rgba(80, 120, 230, 0.22);
   border-radius: 12px;
-  padding: 10px 20px;
+  padding: 10px 16px;
   font-size: 0.84rem;
   color: rgba(244, 234, 216, 0.80);
   z-index: 500;
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.25s ease, transform 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .grp-toast--visible {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
 }
+.grp-toast-copy {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  opacity: 0.7;
+  padding: 0;
+  flex-shrink: 0;
+}
+.grp-toast-copy:hover { opacity: 1; }
