@@ -420,11 +420,12 @@ function getBranchReadTime(branchId) {
 
 async function getLatestMessageTimes(branchIds) {
   if (!branchIds.length) return {};
-  const { data } = await sb
+  const { data, error } = await sb
     .from('branch_messages')
     .select('branch_id, created_at')
     .in('branch_id', branchIds)
     .order('created_at', { ascending: false });
+  console.log('[unread] branch_messages query data:', data, 'error:', error ? JSON.stringify(error) : null);
   const latest = {};
   (data || []).forEach(msg => {
     if (!latest[msg.branch_id]) latest[msg.branch_id] = msg.created_at;
