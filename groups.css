@@ -282,6 +282,47 @@
 .grp-branch-item--active .grp-branch-name { color: rgba(255, 215, 140, 0.88); }
 .grp-branch-item--active .grp-branch-hash { color: rgba(255, 175, 70, 0.50); }
 
+.grp-branch-settings {
+  background: none;
+  border: none;
+  color: rgba(180, 200, 255, 0.22);
+  font-size: 0.78rem;
+  cursor: pointer;
+  padding: 0 2px;
+  margin-left: auto;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.grp-branch-item:hover .grp-branch-settings { opacity: 1; }
+.grp-branch-settings:hover { color: rgba(255, 175, 70, 0.80); }
+
+.grp-perm-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.grp-perm-label {
+  font-size: 0.82rem;
+  color: rgba(244, 234, 216, 0.50);
+}
+
+.grp-perm-select {
+  background: rgba(10, 16, 52, 0.80);
+  border: 1px solid rgba(80, 120, 230, 0.24);
+  border-radius: 8px;
+  color: rgba(244, 234, 216, 0.80);
+  font-size: 0.82rem;
+  font-family: inherit;
+  padding: 5px 10px;
+  cursor: pointer;
+  outline: none;
+}
+.grp-perm-select:focus { border-color: rgba(255, 175, 70, 0.40); }
+
 .grp-branch-category {
   padding: 10px 8px 3px;
   font-size: 0.63rem;

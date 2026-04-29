@@ -318,6 +318,72 @@ async function doCreateBranch(group) {
   showToast(`# ${name} created!`);
 }
 
+// ── Edit branch modal ─────────────────────────────────────────
+
+function openEditBranchModal(branch) {
+  showModal(`
+    <div class="grp-modal-title">Edit Branch</div>
+    <input class="grp-modal-input" id="modalEditName"
+           value="${escGrp(branch.name)}" maxlength="40">
+    <input class="grp-modal-input" id="modalEditCategory"
+           value="${escGrp(branch.category || '')}" placeholder="Category (optional)…" maxlength="30">
+    <div class="grp-perm-row">
+      <span class="grp-perm-label">Who can view?</span>
+      <select class="grp-perm-select" id="modalCanView">
+        <option value="all"   ${branch.can_view === 'all'   ? 'selected' : ''}>All members</option>
+        <option value="owner" ${branch.can_view === 'owner' ? 'selected' : ''}>Owner only</option>
+      </select>
+    </div>
+    <div class="grp-perm-row">
+      <span class="grp-perm-label">Who can post?</span>
+      <select class="grp-perm-select" id="modalCanPost">
+        <option value="all"   ${branch.can_post === 'all'   ? 'selected' : ''}>All members</option>
+        <option value="owner" ${branch.can_post === 'owner' ? 'selected' : ''}>Owner only</option>
+      </select>
+    </div>
+    <div class="grp-modal-btns">
+      <button class="grp-btn grp-btn--danger" id="btnDeleteBranch">Delete</button>
+      <button class="grp-btn grp-btn--ghost"  id="btnModalCancel">Cancel</button>
+      <button class="grp-btn grp-btn--primary" id="btnModalOk">Save</button>
+    </div>
+  `);
+
+  document.getElementById('btnModalCancel').addEventListener('click', closeModal);
+
+  document.getElementById('btnDeleteBranch').addEventListener('click', async () => {
+    if (!confirm(`Delete "#${branch.name}"? All messages will be lost.`)) return;
+    await sb.from('group_branches').delete().eq('id', branch.id);
+    if (selectedBranch?.id === branch.id) {
+      selectedBranch = null;
+      document.getElementById('grpChatMain').innerHTML = '';
+    }
+    closeModal();
+    await selectGroup(currentGroup);
+    showToast(`# ${branch.name} deleted.`);
+  });
+
+  document.getElementById('btnModalOk').addEventListener('click', async () => {
+    const name     = document.getElementById('modalEditName').value.trim();
+    const category = document.getElementById('modalEditCategory').value.trim();
+    const can_view = document.getElementById('modalCanView').value;
+    const can_post = document.getElementById('modalCanPost').value;
+    if (!name) { document.getElementById('modalEditName').focus(); return; }
+
+    const btn = document.getElementById('btnModalOk');
+    btn.disabled = true; btn.textContent = 'Saving…';
+
+    const { error } = await sb.from('group_branches')
+      .update({ name, category: category || null, can_view, can_post })
+      .eq('id', branch.id);
+
+    if (error) { showToast('Could not save changes.'); closeModal(); return; }
+
+    closeModal();
+    await selectGroup(currentGroup);
+    showToast('Branch updated.');
+  });
+}
+
 function renderBranchList(branches) {
   const list = document.getElementById('grpBranchList');
   if (!list) return;
@@ -350,13 +416,21 @@ function renderBranchList(branches) {
       item.innerHTML = `
         <span class="grp-branch-hash">#</span>
         <span class="grp-branch-name">${escGrp(b.name)}</span>
+        ${isOwner ? `<button class="grp-branch-settings" title="Edit branch">⚙</button>` : ''}
       `;
-      item.addEventListener('click', () => {
+      item.addEventListener('click', (e) => {
+        if (e.target.closest('.grp-branch-settings')) return;
         selectedBranch = b;
         document.querySelectorAll('.grp-branch-item').forEach(el => el.classList.remove('grp-branch-item--active'));
         item.classList.add('grp-branch-item--active');
         showBranchChat(b);
       });
+      if (isOwner) {
+        item.querySelector('.grp-branch-settings').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openEditBranchModal(b);
+        });
+      }
       list.appendChild(item);
     });
   });
