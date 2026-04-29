@@ -253,6 +253,49 @@ function renderDetail(group, members, panels, branches) {
   document.getElementById('btnSharePanel').addEventListener('click', () => {
     openShareModal(group);
   });
+
+  document.getElementById('btnAddBranch').addEventListener('click', () => {
+    openCreateBranchModal(group);
+  });
+}
+
+// ── Create branch modal ───────────────────────────────────────
+
+function openCreateBranchModal(group) {
+  showModal(`
+    <div class="grp-modal-title">New Branch</div>
+    <input class="grp-modal-input" id="modalBranchName"
+           placeholder="Branch name…" maxlength="40">
+    <input class="grp-modal-input" id="modalBranchCategory"
+           placeholder="Category (optional)…" maxlength="30">
+    <div class="grp-modal-btns">
+      <button class="grp-btn grp-btn--ghost" id="btnModalCancel">Cancel</button>
+      <button class="grp-btn grp-btn--primary" id="btnModalOk">Create</button>
+    </div>
+  `);
+
+  const nameInput = document.getElementById('modalBranchName');
+  nameInput.focus();
+
+  document.getElementById('btnModalCancel').addEventListener('click', closeModal);
+  document.getElementById('btnModalOk').addEventListener('click', () => doCreateBranch(group));
+  nameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter')  doCreateBranch(group);
+    if (e.key === 'Escape') closeModal();
+  });
+}
+
+async function doCreateBranch(group) {
+  const name     = document.getElementById('modalBranchName').value.trim();
+  const category = document.getElementById('modalBranchCategory').value.trim();
+  if (!name) { document.getElementById('modalBranchName').focus(); return; }
+
+  const btn = document.getElementById('btnModalOk');
+  btn.disabled = true;
+  btn.textContent = 'Creating…';
+
+  showToast(`Branch "${name}" coming soon…`);
+  closeModal();
 }
 
 function renderBranchList(branches) {
