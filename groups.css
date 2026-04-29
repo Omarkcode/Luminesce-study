@@ -741,6 +741,79 @@
   padding: 40px 0;
 }
 
+/* ── Message bubbles ─────────────────────────────────────────── */
+.grp-message {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: 72%;
+}
+
+.grp-message--me {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.grp-message-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+}
+
+.grp-message--me .grp-message-meta {
+  flex-direction: row-reverse;
+}
+
+.grp-message-author {
+  font-size: 0.72rem;
+  color: rgba(180, 200, 255, 0.42);
+  font-weight: 500;
+}
+
+.grp-message-time {
+  font-size: 0.65rem;
+  color: rgba(180, 200, 255, 0.22);
+}
+
+.grp-message-text {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(80, 120, 230, 0.12);
+  border-radius: 12px 12px 12px 4px;
+  padding: 8px 12px;
+  font-size: 0.86rem;
+  color: rgba(244, 234, 216, 0.86);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.grp-message--me .grp-message-text {
+  background: rgba(255, 175, 70, 0.10);
+  border-color: rgba(255, 175, 70, 0.20);
+  border-radius: 12px 12px 4px 12px;
+}
+
+.grp-message-panel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(10, 16, 50, 0.72);
+  border: 1px solid rgba(80, 120, 230, 0.16);
+  border-radius: 10px;
+  padding: 7px 10px;
+  font-size: 0.80rem;
+}
+
+.grp-message-panel-name {
+  color: rgba(244, 234, 216, 0.80);
+  font-weight: 500;
+  flex: 1;
+}
+
+.grp-message-panel-count {
+  color: rgba(180, 200, 255, 0.32);
+  font-size: 0.72rem;
+}
+
 /* ── Chat input ──────────────────────────────────────────────── */
 .grp-chat-input-wrap {
   margin-top: 16px;

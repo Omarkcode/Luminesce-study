@@ -378,8 +378,12 @@ function showBranchChat(branch) {
   `;
 
   document.getElementById('btnAttachPanel').addEventListener('click', openAttachPanelPicker);
+  document.getElementById('btnSendMsg').addEventListener('click', () => sendMessage(branch));
   document.getElementById('grpChatInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) e.preventDefault();
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(branch);
+    }
   });
 }
 
@@ -452,6 +456,75 @@ function renderAttachmentPreview(panel) {
     preview.hidden = true;
     preview.innerHTML = '';
   });
+}
+
+async function sendMessage(branch) {
+  const input   = document.getElementById('grpChatInput');
+  const content = input?.value.trim();
+  if (!content && !pendingAttachment) return;
+
+  const displayName = currentUser.user_metadata?.username || currentUser.email.split('@')[0];
+
+  const payload = {
+    branch_id:    branch.id,
+    group_id:     branch.group_id,
+    user_id:      currentUser.id,
+    display_name: displayName,
+    content:      content || '',
+    attachment:   pendingAttachment
+      ? { name: pendingAttachment.name, type: pendingAttachment.type, questions: pendingAttachment.questions }
+      : null
+  };
+
+  const { data: msg, error } = await sb.from('branch_messages').insert(payload).select().single();
+  if (error) { showToast('Could not send message.'); return; }
+
+  if (input) input.value = '';
+  pendingAttachment = null;
+  const preview = document.getElementById('grpAttachPreview');
+  if (preview) { preview.hidden = true; preview.innerHTML = ''; }
+
+  appendMessage(msg);
+}
+
+function appendMessage(msg) {
+  const messages = document.getElementById('grpMessages');
+  if (!messages) return;
+
+  const empty = messages.querySelector('.grp-messages-empty');
+  if (empty) empty.remove();
+
+  const isMe = msg.user_id === currentUser.id;
+  const div  = document.createElement('div');
+  div.className = 'grp-message' + (isMe ? ' grp-message--me' : '');
+  div.innerHTML = `
+    <div class="grp-message-meta">
+      <span class="grp-message-author">${escGrp(msg.display_name)}</span>
+      <span class="grp-message-time">${formatTime(msg.sent_at)}</span>
+    </div>
+    ${msg.content ? `<div class="grp-message-text">${escGrp(msg.content)}</div>` : ''}
+    ${msg.attachment ? `
+      <div class="grp-message-panel" data-panel='${JSON.stringify(msg.attachment)}'>
+        <span>${msg.attachment.type === 'flashcard' ? '🃏' : '📝'}</span>
+        <span class="grp-message-panel-name">${escGrp(msg.attachment.name)}</span>
+        <span class="grp-message-panel-count">${msg.attachment.questions?.length || 0} ${msg.attachment.type === 'flashcard' ? 'cards' : 'qs'}</span>
+        <button class="grp-btn grp-btn--amber grp-message-panel-play">▶ Play</button>
+      </div>` : ''}
+  `;
+
+  if (msg.attachment) {
+    div.querySelector('.grp-message-panel-play').addEventListener('click', () => {
+      openPlayer(msg.attachment);
+    });
+  }
+
+  messages.appendChild(div);
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function formatTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 function showDetailEmpty() {
