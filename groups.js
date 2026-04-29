@@ -9,11 +9,13 @@ const sb = supabase.createClient(
 
 // ── State ─────────────────────────────────────────────────────
 
-let currentUser     = null;
-let myGroups        = [];
-let selectedGroupId = null;
-let selectedBranch  = null;
+let currentUser       = null;
+let myGroups          = [];
+let selectedGroupId   = null;
+let selectedBranch    = null;
 let pendingAttachment = null;
+let branchChannel     = null;
+let renderedMsgIds    = new Set();
 
 // ── Init ──────────────────────────────────────────────────────
 
@@ -401,8 +403,11 @@ async function showBranchChat(branch) {
   }
 
   msgArea.innerHTML = '';
+  renderedMsgIds = new Set();
   messages.forEach(m => appendMessage(m));
   msgArea.scrollTop = msgArea.scrollHeight;
+
+  subscribeToBranch(branch);
 }
 
 async function openAttachPanelPicker() {
@@ -508,6 +513,8 @@ async function sendMessage(branch) {
 function appendMessage(msg) {
   const messages = document.getElementById('grpMessages');
   if (!messages) return;
+  if (renderedMsgIds.has(msg.id)) return;
+  renderedMsgIds.add(msg.id);
 
   const empty = messages.querySelector('.grp-messages-empty');
   if (empty) empty.remove();
@@ -543,6 +550,25 @@ function appendMessage(msg) {
 function formatTime(iso) {
   const d = new Date(iso);
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+function subscribeToBranch(branch) {
+  if (branchChannel) {
+    sb.removeChannel(branchChannel);
+    branchChannel = null;
+  }
+
+  branchChannel = sb
+    .channel(`branch-${branch.id}`)
+    .on('postgres_changes', {
+      event:  'INSERT',
+      schema: 'public',
+      table:  'branch_messages',
+      filter: `branch_id=eq.${branch.id}`
+    }, (payload) => {
+      appendMessage(payload.new);
+    })
+    .subscribe();
 }
 
 function showDetailEmpty() {
