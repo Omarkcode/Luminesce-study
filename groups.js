@@ -650,6 +650,7 @@ function appendMessage(msg) {
         <span class="grp-message-panel-name">${escGrp(msg.attachment.name)}</span>
         <span class="grp-message-panel-count">${msg.attachment.questions?.length || 0} ${msg.attachment.type === 'flashcard' ? 'cards' : 'qs'}</span>
         <button class="grp-btn grp-btn--amber grp-message-panel-play">▶ Play</button>
+        <button class="grp-btn grp-btn--ghost grp-message-panel-save">Save</button>
       </div>` : ''}
   `;
 
