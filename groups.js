@@ -118,16 +118,15 @@ async function selectGroup(group) {
   const detail = document.getElementById('grpDetail');
   detail.innerHTML = '<div class="grp-loading">Loading…</div>';
 
-  const [{ data: members }, { data: panels }, { data: branches }] = await Promise.all([
+  const [{ data: members }, { data: branches }] = await Promise.all([
     sb.from('group_members').select('*').eq('group_id', group.id).order('joined_at'),
-    sb.from('group_panels').select('*').eq('group_id', group.id).order('shared_at', { ascending: false }),
     sb.from('group_branches').select('*').eq('group_id', group.id).order('created_at')
   ]);
 
-  renderDetail(group, members || [], panels || [], branches || []);
+  renderDetail(group, members || [], branches || []);
 }
 
-function renderDetail(group, members, panels, branches) {
+function renderDetail(group, members, branches) {
   const isOwner = group.created_by === currentUser.id;
   const detail  = document.getElementById('grpDetail');
 
@@ -171,16 +170,6 @@ function renderDetail(group, members, panels, branches) {
           <div class="grp-members-list" id="grpMembersList"></div>
         </div>
 
-        <div class="grp-section">
-          <div class="grp-section-hdr">
-            <div class="grp-section-hdr-left">
-              <span class="grp-section-title">Shared Panels</span>
-              <span class="grp-section-count">${panels.length}</span>
-            </div>
-            <button class="grp-btn grp-btn--amber" id="btnSharePanel">Share a Panel</button>
-          </div>
-          <div class="grp-panels-grid" id="grpPanelsGrid"></div>
-        </div>
       </div>
 
     </div>
@@ -205,50 +194,6 @@ function renderDetail(group, members, panels, branches) {
     membersList.appendChild(div);
   });
 
-  // Render panels
-  const grid = document.getElementById('grpPanelsGrid');
-  if (panels.length === 0) {
-    grid.innerHTML = '<div class="grp-panels-empty">No panels shared yet — be the first!</div>';
-  } else {
-    panels.forEach(p => {
-      const icon  = p.panel_type === 'flashcard' ? '🃏' : '📝';
-      const count = p.panel_data?.questions?.length || 0;
-      const label = p.panel_type === 'flashcard' ? `${count} cards` : `${count} questions`;
-      const canDel = p.shared_by === currentUser.id || isOwner;
-
-      const card = document.createElement('div');
-      card.className = 'grp-panel-card';
-      card.innerHTML = `
-        <div class="grp-panel-icon">${icon}</div>
-        <div class="grp-panel-name">${escGrp(p.panel_name)}</div>
-        <div class="grp-panel-meta">by ${escGrp(p.shared_by_name)} · ${label}</div>
-        <div class="grp-panel-btns">
-          <button class="grp-panel-btn grp-panel-btn--play">▶ Play</button>
-          ${canDel ? '<button class="grp-panel-btn grp-panel-btn--del">✕</button>' : ''}
-        </div>
-      `;
-
-      card.querySelector('.grp-panel-btn--play').addEventListener('click', () => {
-        openPlayer({
-          name:      p.panel_name,
-          type:      p.panel_type,
-          questions: p.panel_data?.questions || []
-        });
-      });
-
-      if (canDel) {
-        card.querySelector('.grp-panel-btn--del').addEventListener('click', async () => {
-          if (!confirm(`Remove "${p.panel_name}" from the group?`)) return;
-          await sb.from('group_panels').delete().eq('id', p.id);
-          showToast('Panel removed.');
-          selectGroup(group);
-        });
-      }
-
-      grid.appendChild(card);
-    });
-  }
-
   // Wire buttons
   document.getElementById('btnCopyCode').addEventListener('click', () => {
     navigator.clipboard.writeText(group.invite_code);
@@ -258,10 +203,6 @@ function renderDetail(group, members, panels, branches) {
   document.getElementById('btnLeaveOrDelete').addEventListener('click', () => {
     if (isOwner) confirmDeleteGroup(group);
     else         confirmLeaveGroup(group);
-  });
-
-  document.getElementById('btnSharePanel').addEventListener('click', () => {
-    openShareModal(group);
   });
 
   document.getElementById('btnAddBranch').addEventListener('click', () => {
@@ -903,74 +844,6 @@ function openJoinModal() {
     if (g) selectGroup(g);
     showToast(`Joined "${group.name}"!`);
   }
-}
-
-// ── Share panel modal ─────────────────────────────────────────
-
-async function openShareModal(group) {
-  showModal(`
-    <div class="grp-modal-title">Share a Panel</div>
-    <div class="grp-loading" style="padding:20px 0">Loading your panels…</div>
-  `);
-
-  const panels = await loadKnowledgePanels();
-
-  if (panels.length === 0) {
-    document.getElementById('grpModal').innerHTML = `
-      <div class="grp-modal-title">Share a Panel</div>
-      <p class="grp-modal-desc">You don't have any knowledge panels yet. Head to Study Buddy and ask it to make some!</p>
-      <div class="grp-modal-btns">
-        <button class="grp-btn grp-btn--ghost" id="btnModalCancel">Close</button>
-      </div>
-    `;
-    document.getElementById('btnModalCancel').addEventListener('click', closeModal);
-    return;
-  }
-
-  const displayName = currentUser.user_metadata?.username || currentUser.email.split('@')[0];
-
-  document.getElementById('grpModal').innerHTML = `
-    <div class="grp-modal-title">Share a Panel</div>
-    <p class="grp-modal-desc">Pick a panel to share with <strong>${escGrp(group.name)}</strong>.</p>
-    <div class="grp-share-list" id="grpShareList"></div>
-    <div class="grp-modal-btns">
-      <button class="grp-btn grp-btn--ghost" id="btnModalCancel">Cancel</button>
-    </div>
-  `;
-  document.getElementById('btnModalCancel').addEventListener('click', closeModal);
-
-  const list = document.getElementById('grpShareList');
-  panels.forEach(p => {
-    const icon  = p.type === 'flashcard' ? '🃏' : '📝';
-    const count = p.questions?.length || 0;
-    const row   = document.createElement('div');
-    row.className = 'grp-share-row';
-    row.innerHTML = `
-      <span class="grp-share-icon">${icon}</span>
-      <span class="grp-share-name">${escGrp(p.name)}</span>
-      <span class="grp-share-count">${count} ${p.type === 'flashcard' ? 'cards' : 'qs'}</span>
-      <button class="grp-btn grp-btn--amber grp-share-btn">Share</button>
-    `;
-    row.querySelector('.grp-share-btn').addEventListener('click', async () => {
-      const btn = row.querySelector('.grp-share-btn');
-      btn.disabled = true;
-      btn.textContent = '…';
-
-      await sb.from('group_panels').insert({
-        group_id:       group.id,
-        panel_name:     p.name,
-        panel_type:     p.type,
-        panel_data:     { questions: p.questions },
-        shared_by:      currentUser.id,
-        shared_by_name: displayName
-      });
-
-      closeModal();
-      selectGroup(group);
-      showToast(`"${p.name}" shared!`);
-    });
-    list.appendChild(row);
-  });
 }
 
 // ── Leave / Delete ────────────────────────────────────────────
