@@ -151,7 +151,7 @@ function renderDetail(group, members, branches) {
       <nav class="grp-branch-sidebar">
         <div class="grp-branch-sidebar-hdr">
           <span>Branches</span>
-          <button class="grp-branch-add" id="btnAddBranch">+</button>
+          ${isOwner ? `<button class="grp-branch-add" id="btnAddBranch">+</button>` : ''}
         </div>
         <div class="grp-branch-list" id="grpBranchList"></div>
       </nav>
@@ -202,9 +202,11 @@ function renderDetail(group, members, branches) {
     else         confirmLeaveGroup(group);
   });
 
-  document.getElementById('btnAddBranch').addEventListener('click', () => {
-    openCreateBranchModal(group);
-  });
+  if (isOwner) {
+    document.getElementById('btnAddBranch').addEventListener('click', () => {
+      openCreateBranchModal(group);
+    });
+  }
 
   if (isOwner) {
     document.getElementById('btnEditGroup').addEventListener('click', () => {
@@ -375,7 +377,8 @@ function openEditBranchModal(branch) {
 
   document.getElementById('btnDeleteBranch').addEventListener('click', async () => {
     if (!confirm(`Delete "#${branch.name}"? All messages will be lost.`)) return;
-    await sb.from('group_branches').delete().eq('id', branch.id);
+    const { error: delErr } = await sb.from('group_branches').delete().eq('id', branch.id);
+    if (delErr) { showToast('Could not delete branch: ' + (delErr.message || delErr.code)); return; }
     if (selectedBranch?.id === branch.id) {
       selectedBranch = null;
       document.getElementById('grpChatMain').innerHTML = '';
