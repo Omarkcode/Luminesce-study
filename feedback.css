@@ -1,0 +1,179 @@
+/* ============================================================
+   feedback.css
+   ============================================================ */
+
+.fb-page {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+.fb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 28px;
+  border-bottom: 1px solid rgba(80, 120, 230, 0.12);
+  flex-shrink: 0;
+  background: rgba(6, 9, 26, 0.55);
+  backdrop-filter: blur(12px);
+}
+
+.fb-back {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid rgba(80, 120, 230, 0.22);
+  border-radius: 8px;
+  color: rgba(180, 200, 255, 0.65);
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.fb-back:hover {
+  background: rgba(80, 120, 230, 0.10);
+  color: rgba(220, 230, 255, 0.90);
+}
+
+.fb-title {
+  font-family: 'Dancing Script', cursive;
+  font-size: 1.5rem;
+  color: rgba(244, 234, 216, 0.88);
+  font-weight: 500;
+}
+
+.fb-header-right { width: 72px; }
+
+/* ── Body ───────────────────────────────────────────────────── */
+.fb-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 680px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 24px 28px 28px;
+  overflow: hidden;
+}
+
+.fb-hint {
+  font-size: 0.82rem;
+  color: rgba(180, 200, 255, 0.40);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+/* ── Messages ───────────────────────────────────────────────── */
+.fb-messages {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 4px;
+  margin-bottom: 18px;
+}
+
+.fb-messages::-webkit-scrollbar       { width: 4px; }
+.fb-messages::-webkit-scrollbar-track { background: transparent; }
+.fb-messages::-webkit-scrollbar-thumb { background: rgba(80,120,230,0.18); border-radius: 2px; }
+
+.fb-empty {
+  font-size: 0.84rem;
+  color: rgba(180, 200, 255, 0.35);
+  text-align: center;
+  margin-top: 40px;
+}
+
+.fb-message {
+  align-self: flex-end;
+  max-width: 82%;
+  background: rgba(60, 100, 220, 0.18);
+  border: 1px solid rgba(80, 120, 230, 0.22);
+  border-radius: 14px 14px 4px 14px;
+  padding: 10px 14px;
+}
+
+.fb-message-text {
+  font-size: 0.88rem;
+  color: rgba(220, 230, 255, 0.88);
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.fb-message-time {
+  font-size: 0.70rem;
+  color: rgba(180, 200, 255, 0.35);
+  margin-top: 5px;
+  text-align: right;
+}
+
+/* ── Input ──────────────────────────────────────────────────── */
+.fb-input-wrap {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.fb-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(80, 120, 230, 0.22);
+  border-radius: 12px;
+  color: rgba(220, 230, 255, 0.88);
+  font-size: 0.88rem;
+  padding: 10px 14px;
+  resize: none;
+  outline: none;
+  font-family: inherit;
+  line-height: 1.5;
+  transition: border-color 0.15s;
+}
+.fb-input:focus {
+  border-color: rgba(80, 120, 230, 0.50);
+}
+.fb-input::placeholder {
+  color: rgba(180, 200, 255, 0.28);
+}
+
+.fb-send {
+  background: rgba(60, 100, 220, 0.55);
+  border: 1px solid rgba(80, 120, 230, 0.35);
+  border-radius: 12px;
+  color: rgba(220, 235, 255, 0.90);
+  font-size: 0.84rem;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.fb-send:hover    { background: rgba(60, 100, 220, 0.75); }
+.fb-send:disabled { opacity: 0.5; cursor: default; }
+
+/* ── Toast ──────────────────────────────────────────────────── */
+.fb-toast {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: rgba(8, 11, 28, 0.96);
+  border: 1px solid rgba(80, 120, 230, 0.22);
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-size: 0.84rem;
+  color: rgba(244, 234, 216, 0.80);
+  z-index: 500;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+.fb-toast--visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Luminesce Study — Feedback</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="feedback.css" />
+</head>
+<body>
+
+  <canvas id="skyCanvas"></canvas>
+  <canvas id="cityCanvas"></canvas>
+  <div class="moon" aria-hidden="true"></div>
+
+  <div class="fb-page" id="fbPage" style="opacity:0">
+
+    <header class="fb-header">
+      <button class="fb-back" id="btnBack">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+             width="13" height="13">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12 19 5 12 12 5"/>
+        </svg>
+        Menu
+      </button>
+      <h1 class="fb-title">Feedback</h1>
+      <div class="fb-header-right"></div>
+    </header>
+
+    <div class="fb-body">
+      <div class="fb-hint">Your feedback goes directly to the developer. Share bugs, suggestions, or anything on your mind.</div>
+      <div class="fb-messages" id="fbMessages">
+        <div class="fb-empty">Loading…</div>
+      </div>
+      <div class="fb-input-wrap">
+        <textarea class="fb-input" id="fbInput"
+          placeholder="Describe a bug or share a suggestion…"
+          rows="3"></textarea>
+        <button class="fb-send" id="fbSend">Send</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="background.js"></script>
+  <script src="feedback.js"></script>
+</body>
+</html>
