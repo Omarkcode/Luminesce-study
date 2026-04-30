@@ -9,20 +9,99 @@
 const skyCanvas = document.getElementById('skyCanvas');
 const skyCtx    = skyCanvas.getContext('2d');
 
+let stars         = [];
+let featuredStars = [];
+let cloudData     = [];
+let skyFrame      = 0;
+
 function buildSky() {
   skyCanvas.width  = window.innerWidth;
   skyCanvas.height = window.innerHeight;
-  drawSky();
+  generateStarData();
+  generateCloudData();
+}
+
+function generateStarData() {
+  const W = skyCanvas.width, H = skyCanvas.height;
+  const skyH      = H * 0.72;
+  const starCount = Math.round((W * skyH) / 900);
+  stars = [];
+
+  for (let i = 0; i < starCount; i++) {
+    const x  = Math.random() * W;
+    const y  = Math.random() * skyH;
+    const bw = galaxyBandWeight(x, y, W, H);
+    if (Math.random() > 0.52 + bw * 0.48) continue;
+
+    const roll = Math.random();
+    const r = roll < 0.015 ? 1.9 + Math.random() * 0.9
+            : roll < 0.10  ? 0.9 + Math.random() * 0.6
+            :                0.2 + Math.random() * 0.45;
+
+    const inBand = bw > 0.30;
+    let hue, sat, lit, baseAlpha;
+
+    if (inBand && Math.random() < 0.32) {
+      const cr = Math.random();
+      if      (cr < 0.28) { hue = 248 + Math.random()*28; sat = 45+Math.random()*35; }
+      else if (cr < 0.52) { hue = 195 + Math.random()*32; sat = 35+Math.random()*30; }
+      else if (cr < 0.74) { hue = 38  + Math.random()*22; sat = 60+Math.random()*28; }
+      else                { hue = 10  + Math.random()*18; sat = 55+Math.random()*30; }
+      lit       = 68 + Math.random() * 24;
+      baseAlpha = 0.28 + Math.random() * 0.52;
+    } else {
+      hue       = 195 + Math.random() * 55;
+      sat       = 4   + Math.random() * 32;
+      lit       = 78  + Math.random() * 22;
+      baseAlpha = 0.14 + Math.random() * 0.75;
+    }
+
+    stars.push({
+      x, y, r, hue, sat, lit, baseAlpha,
+      speed:     0.0003 + Math.random() * 0.0018,
+      phase:     Math.random() * Math.PI * 2,
+      amplitude: 0.08   + Math.random() * 0.22,
+    });
+  }
+
+  featuredStars = [
+    { x: W*0.08, y: H*0.06, r: 2.5, spike: true  },
+    { x: W*0.22, y: H*0.11, r: 2.1, spike: true  },
+    { x: W*0.47, y: H*0.04, r: 2.7, spike: true  },
+    { x: W*0.63, y: H*0.09, r: 2.0, spike: false },
+    { x: W*0.82, y: H*0.15, r: 2.3, spike: true  },
+    { x: W*0.33, y: H*0.19, r: 1.9, spike: false },
+    { x: W*0.91, y: H*0.07, r: 2.2, spike: true  },
+    { x: W*0.55, y: H*0.23, r: 1.8, spike: false },
+    { x: W*0.14, y: H*0.28, r: 2.0, spike: true  },
+    { x: W*0.70, y: H*0.26, r: 2.1, spike: true  },
+    { x: W*0.04, y: H*0.20, r: 1.7, spike: false },
+    { x: W*0.96, y: H*0.16, r: 1.8, spike: false },
+  ].map(s => ({
+    ...s,
+    hue: 215, sat: 18, lit: 97, baseAlpha: 0.90,
+    speed:     0.0004 + Math.random() * 0.0008,
+    phase:     Math.random() * Math.PI * 2,
+    amplitude: 0.05   + Math.random() * 0.08,
+  }));
+}
+
+function generateCloudData() {
+  const W = skyCanvas.width, H = skyCanvas.height;
+  cloudData = [
+    { x: W * 0.13, y: H * 0.24, scale: 1.2,  speed: 0.18 },
+    { x: W * 0.42, y: H * 0.12, scale: 0.9,  speed: 0.12 },
+    { x: W * 0.60, y: H * 0.32, scale: 1.1,  speed: 0.15 },
+    { x: W * 0.84, y: H * 0.22, scale: 0.85, speed: 0.09 },
+  ];
 }
 
 function drawSky() {
-  const W = skyCanvas.width;
-  const H = skyCanvas.height;
+  const W = skyCanvas.width, H = skyCanvas.height;
   const isDay = document.documentElement.getAttribute('data-theme') === 'day';
   skyCtx.clearRect(0, 0, W, H);
 
   if (isDay) {
-    // Blue sky gradient
     const skyGrd = skyCtx.createLinearGradient(0, 0, 0, H);
     skyGrd.addColorStop(0,    '#1a6db5');
     skyGrd.addColorStop(0.30, '#3a9fd5');
@@ -32,7 +111,6 @@ function drawSky() {
     skyCtx.fillStyle = skyGrd;
     skyCtx.fillRect(0, 0, W, H);
 
-    // Sun glow
     const sx = W * 0.78, sy = H * 0.16, sr = 46;
     const sunGlow = skyCtx.createRadialGradient(sx, sy, 0, sx, sy, sr * 9);
     sunGlow.addColorStop(0,    'rgba(255, 255, 210, 0.55)');
@@ -42,7 +120,6 @@ function drawSky() {
     skyCtx.beginPath(); skyCtx.arc(sx, sy, sr * 9, 0, Math.PI * 2);
     skyCtx.fillStyle = sunGlow; skyCtx.fill();
 
-    // Sun disk
     const sunDisk = skyCtx.createRadialGradient(sx - sr * 0.2, sy - sr * 0.2, 0, sx, sy, sr);
     sunDisk.addColorStop(0,   '#fffde7');
     sunDisk.addColorStop(0.5, '#fff176');
@@ -50,13 +127,16 @@ function drawSky() {
     skyCtx.beginPath(); skyCtx.arc(sx, sy, sr, 0, Math.PI * 2);
     skyCtx.fillStyle = sunDisk; skyCtx.fill();
 
-    // Clouds
-    drawCloud(skyCtx, W * 0.13, H * 0.24, 1.2);
-    drawCloud(skyCtx, W * 0.42, H * 0.12, 0.9);
-    drawCloud(skyCtx, W * 0.60, H * 0.32, 1.1);
-    drawCloud(skyCtx, W * 0.84, H * 0.22, 0.85);
+    // Drifting clouds
+    for (const c of cloudData) {
+      c.x += c.speed;
+      if (c.x > W + 200) c.x = -200;
+      drawCloud(skyCtx, c.x, c.y, c.scale);
+    }
     return;
   }
+
+  // ── Night sky ─────────────────────────────────────────────────
 
   const nebulae = [
     { cx: W*0.48, cy: H*0.18, rx: W*0.20, ry: H*0.09, r: 160, g: 140, b: 100, a: 0.14 },
@@ -84,59 +164,17 @@ function drawSky() {
     skyCtx.restore();
   }
 
-  const skyH      = H * 0.72;
-  const starCount = Math.round((W * skyH) / 900);
-
-  for (let i = 0; i < starCount; i++) {
-    const x  = Math.random() * W;
-    const y  = Math.random() * skyH;
-    const bw = galaxyBandWeight(x, y, W, H);
-
-    if (Math.random() > 0.52 + bw * 0.48) continue;
-
-    const roll = Math.random();
-    const r = roll < 0.015 ? 1.9 + Math.random() * 0.9
-            : roll < 0.10  ? 0.9 + Math.random() * 0.6
-            :                0.2 + Math.random() * 0.45;
-
-    const inBand = bw > 0.30;
-    let hue, sat, lit, alpha;
-
-    if (inBand && Math.random() < 0.32) {
-      const cr = Math.random();
-      if      (cr < 0.28) { hue = 248 + Math.random()*28; sat = 45+Math.random()*35; }
-      else if (cr < 0.52) { hue = 195 + Math.random()*32; sat = 35+Math.random()*30; }
-      else if (cr < 0.74) { hue = 38  + Math.random()*22; sat = 60+Math.random()*28; }
-      else                { hue = 10  + Math.random()*18; sat = 55+Math.random()*30; }
-      lit   = 68 + Math.random() * 24;
-      alpha = 0.28 + Math.random() * 0.52;
-    } else {
-      hue   = 195 + Math.random() * 55;
-      sat   = 4   + Math.random() * 32;
-      lit   = 78  + Math.random() * 22;
-      alpha = 0.14 + Math.random() * 0.75;
-    }
-
-    drawStar(skyCtx, x, y, r, hue, sat, lit, alpha);
+  // Twinkling stars
+  for (const s of stars) {
+    const twinkle = Math.sin(skyFrame * s.speed * 60 + s.phase) * s.amplitude;
+    const alpha   = Math.max(0.04, Math.min(1.0, s.baseAlpha + twinkle));
+    drawStar(skyCtx, s.x, s.y, s.r, s.hue, s.sat, s.lit, alpha);
   }
 
-  const featured = [
-    { x: W*0.08, y: H*0.06, r: 2.5, spike: true  },
-    { x: W*0.22, y: H*0.11, r: 2.1, spike: true  },
-    { x: W*0.47, y: H*0.04, r: 2.7, spike: true  },
-    { x: W*0.63, y: H*0.09, r: 2.0, spike: false },
-    { x: W*0.82, y: H*0.15, r: 2.3, spike: true  },
-    { x: W*0.33, y: H*0.19, r: 1.9, spike: false },
-    { x: W*0.91, y: H*0.07, r: 2.2, spike: true  },
-    { x: W*0.55, y: H*0.23, r: 1.8, spike: false },
-    { x: W*0.14, y: H*0.28, r: 2.0, spike: true  },
-    { x: W*0.70, y: H*0.26, r: 2.1, spike: true  },
-    { x: W*0.04, y: H*0.20, r: 1.7, spike: false },
-    { x: W*0.96, y: H*0.16, r: 1.8, spike: false },
-  ];
-
-  for (const s of featured) {
-    drawStar(skyCtx, s.x, s.y, s.r, 215, 18, 97, 0.90);
+  for (const s of featuredStars) {
+    const twinkle = Math.sin(skyFrame * s.speed * 60 + s.phase) * s.amplitude;
+    const alpha   = Math.max(0.60, Math.min(1.0, s.baseAlpha + twinkle));
+    drawStar(skyCtx, s.x, s.y, s.r, s.hue, s.sat, s.lit, alpha);
     if (s.spike) drawStarSpike(skyCtx, s.x, s.y, s.r);
   }
 }
@@ -413,6 +451,9 @@ function animateCity() {
   const isDay = document.documentElement.getAttribute('data-theme') === 'day';
   cityCtx.clearRect(0, 0, W, H);
   cityFrame++;
+  skyFrame++;
+
+  drawSky();
 
   for (const b of buildings) drawBuilding(cityCtx, b);
 
