@@ -1,0 +1,17 @@
+{
+  "name": "Luminesce Study Space",
+  "short_name": "Luminesce",
+  "description": "A distraction-free study space with timer, AI buddy, groups, and more.",
+  "start_url": "/menu.html",
+  "display": "standalone",
+  "background_color": "#06091a",
+  "theme_color": "#06091a",
+  "icons": [
+    {
+      "src": "Luminesce Study Space.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
